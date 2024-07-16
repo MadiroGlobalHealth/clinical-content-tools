@@ -19,7 +19,7 @@ FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 95)
 # Output directory to save the generated form JSONs
 OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
 # Get the list of sheets to process from the configuration settings
-excel_sheets = config.get('sheets', [])
+sheets = config.get('sheets', [])
 
 # Columns names from the metadata spreadsheet
 automatch_references = config.get('automatch_references', {})
@@ -92,8 +92,8 @@ def find_column_index(worksheet, column_name):
 # Initialize the counter for total matches found
 TOTAL_MATCHES_FOUND = 0
 
-# Iterate through the sheets in df that are in the excel_sheets list with headers on row 2
-for sheet_name in excel_sheets:
+# Iterate through the sheets in df that are in the sheets list with headers on row 2
+for sheet_name in sheets:
 
     # Iterate through each OCL source and look for suggestions for the primary and secondary lookups
     for source_name, source_config in automatch_references.items():
