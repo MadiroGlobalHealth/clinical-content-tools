@@ -70,7 +70,7 @@ python matcher.py
 
 The script will read the configuration from the `config.json` file, process the concepts, and generate the form schemas based on the matching results.
 
-### xlsx_to_openmrs3_forms.py
+### Usage and configuration for `xlsx_to_openmrs3_forms.py` 
 
 Similarly to `matcher.py`, use the `xlsx_to_openmrs3_forms.py` script with the provided in the Excel file containing the form configuration metadata.
 
