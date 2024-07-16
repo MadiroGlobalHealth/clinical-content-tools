@@ -7,19 +7,16 @@ import re
 import time
 import pandas as pd
 
-# Load the metadata
-METADATA_FILE = 'metadata.xlsx'
+# Load the configuration settings from config.json
+with open('config.json', 'r', encoding='utf-8') as f:
+    config = json.load(f)
+
+# Extract the configuration settings
+METADATA_FILE = config.get('METADATA_FILE', 'metadata.xlsx')
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
-sheets = [
-    'F01-MHPSS Baseline', 
-    'F02-MHPSS Follow-up', 
-    'F03-mhGAP Baseline', 
-    'F04-mhGAP Follow-up', 
-    'F05-MH Closure', 
-    'F06-PHQ-9',
-    'OptionSets'
-    ]
+# List of sheets to process
+sheets = config.get('sheets', [])
 
 # Define a global list to store all questions and answers
 ALL_QUESTIONS_ANSWERS = []

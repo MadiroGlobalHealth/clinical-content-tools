@@ -1,0 +1,35 @@
+{
+    "sheets": [
+      "F01-MHPSS Baseline",
+      "F02-MHPSS Follow-up",
+      "F03-mhGAP Baseline",
+      "F04-mhGAP Follow-up",
+      "F05-MH Closure",
+      "F06-PHQ-9",
+      "OptionSets"
+    ],
+    "OCL_URL": "https://app.openconceptlab.org/#",
+    "FUZZY_THRESHOLD": 95,
+    "METADATA_FILEPATH": "./metadata.xlsx",
+    "OUTPUT_DIR": "./generated_form_schemas",
+    "automatch_references": {
+      "MSF": {
+        "source_filepath": "MSF_Source_20240712_163433.json",
+        "suggestion_column": "MSF Source Suggestion",
+        "external_id_column": "MSF Source External ID",
+        "description_column": "MSF Source Description",
+        "datatype_column": "MSF Source Datatype",
+        "dataclass_column": "MSF Source Class",
+        "score_column": "MSF Source Score"
+      },
+      "CIEL": {
+        "source_filepath": "CIEL_Source_20240708_153712.json",
+        "suggestion_column": "CIEL Source Suggestion",
+        "external_id_column": "CIEL Source External ID",
+        "description_column": "CIEL Source Description",
+        "datatype_column": "CIEL Source Datatype",
+        "dataclass_column": "CIEL Source Class",
+        "score_column": "CIEL Source Score"
+      }
+    }
+  }

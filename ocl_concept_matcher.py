@@ -5,56 +5,33 @@ import openpyxl
 from rapidfuzz import process, fuzz
 import pandas as pd
 
+# Load the configuration settings from config.json
+with open('config.json', 'r', encoding='utf-8') as f:
+    config = json.load(f)
+
+# Extract the configuration settings
+# Load the metadata spreadsheet
+METADATA_FILEPATH = config.get('METADATA_FILEPATH', './metadata.xlsx')
+# Load the OCL Concepts spreadsheet
+OCL_URL = config.get('OCL_URL', 'https://app.openconceptlab.org/#')
+# Matching treshold for fuzzy matching
+FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 95)
+# Output directory to save the generated form JSONs
+OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
+# Get the list of sheets to process from the configuration settings
+excel_sheets = config.get('sheets', [])
+
+# Columns names from the metadata spreadsheet
+automatch_references = config.get('automatch_references', {})
+
 # Ignore potential warnings related to opening large Excel files
 openpyxl.reader.excel.warnings.simplefilter(action='ignore')
-
-# Excel Metadata filepath
-METADATA_FILEPATH = "./metadata.xlsx"
-
-# OCL URL
-OCL_URL = "https://app.openconceptlab.org/#"
-
-# Matching threshold for fuzzy string matching
-FUZZY_THRESHOLD = 95
 
 # Initialize the counter of concept to match
 CONCEPTS_TO_MATCH = 0
 
 # Initialize the counter of matches found above the threshold
 MATCHES_FOUND = 0
-
-# Define the sheets to read
-excel_sheets = [
-    'F01-MHPSS Baseline', 
-    'F02-MHPSS Follow-up', 
-    'F03-mhGAP Baseline', 
-    'F04-mhGAP Follow-up', 
-    'F05-MH Closure', 
-    'F06-PHQ-9',
-    'OptionSets'
-    ]
-
-# Define OCL sources and their respective columns in the Excel document
-automatch_references = {
-    "MSF": {
-        "source_filepath": "MSF_Source_20240712_163433.json",
-        "suggestion_column": "MSF Source Suggestion",
-        "external_id_column": "MSF Source External ID",
-        "description_column": "MSF Source Description",
-        "datatype_column": "MSF Source Datatype",
-        "dataclass_column": "MSF Source Class",
-        "score_column": "MSF Source Score"
-    },
-    "CIEL": {
-        "source_filepath": "CIEL_Source_20240708_153712.json",
-        "suggestion_column": "CIEL Source Suggestion",
-        "external_id_column": "CIEL Source External ID",
-        "description_column": "CIEL Source Description",
-        "datatype_column": "CIEL Source Datatype",
-        "dataclass_column": "CIEL Source Class",
-        "score_column": "CIEL Source Score"
-    }
-}
 
 # Find the best matches for each primary and secondary label in the metadata spreadsheet
 def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit=5):
