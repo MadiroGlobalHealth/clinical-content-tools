@@ -12,11 +12,11 @@ with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 # Extract the configuration settings
-METADATA_FILE = config.get('METADATA_FILE', 'metadata.xlsx')
+METADATA_FILE = config.get('METADATA_FILE', 'metadata_example.xlsx')
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 # List of sheets to process
-sheets = config.get('sheets', [])
+SHEETS = config.get('SHEETS_TO_PREVIEW', [])
 
 # Define a global list to store all questions and answers
 ALL_QUESTIONS_ANSWERS = []
@@ -248,7 +248,8 @@ def generate_question(row, columns, question_translations):
                             )
 
     question_label = manage_label(original_question_label)
-    question_id = manage_id(original_question_label)
+    question_id = (row['Question ID'] if 'Question ID' in columns and
+                        pd.notnull(row['Question ID']) else manage_id(original_question_label))
 
     question_concept_id = (row['External ID'] if 'External ID' in columns and
                         pd.notnull(row['External ID']) else question_id)
@@ -426,7 +427,7 @@ TOTAL_ANSWERS = 0
 # Start the timer
 start_time = time.time()
 
-for sheet in sheets:
+for sheet in SHEETS:
     translations_data = {}
     form, concept_ids, total_questions, total_answers = generate_form(sheet, translations_data)
     translations = generate_translation_file(sheet, 'ar', translations_data)
@@ -453,7 +454,7 @@ for sheet in sheets:
     TOTAL_ANSWERS += total_answers
 
 # Count the number of forms generated
-FORMS_GENERATED = len(sheets)
+FORMS_GENERATED = len(SHEETS)
 
 # End the timer
 end_time = time.time()

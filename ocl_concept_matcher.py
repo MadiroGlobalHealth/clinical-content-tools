@@ -11,7 +11,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
 
 # Extract the configuration settings
 # Load the metadata spreadsheet
-METADATA_FILEPATH = config.get('METADATA_FILEPATH', './metadata.xlsx')
+METADATA_FILEPATH = config.get('METADATA_FILEPATH', './metadata_example.xlsx')
 # Load the OCL Concepts spreadsheet
 OCL_URL = config.get('OCL_URL', 'https://app.openconceptlab.org/#')
 # Matching treshold for fuzzy matching
@@ -19,7 +19,7 @@ FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 95)
 # Output directory to save the generated form JSONs
 OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
 # Get the list of sheets to process from the configuration settings
-sheets = config.get('sheets', [])
+SHEETS = config.get('SHEETS_TO_MATCH', [])
 
 # Columns names from the metadata spreadsheet
 automatch_references = config.get('automatch_references', {})
@@ -93,7 +93,7 @@ def find_column_index(worksheet, column_name):
 TOTAL_MATCHES_FOUND = 0
 
 # Iterate through the sheets in df that are in the sheets list with headers on row 2
-for sheet_name in sheets:
+for sheet_name in SHEETS:
 
     # Iterate through each OCL source and look for suggestions for the primary and secondary lookups
     for source_name, source_config in automatch_references.items():
