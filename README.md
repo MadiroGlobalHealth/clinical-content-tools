@@ -53,7 +53,7 @@ To use the `matcher.py` script, you need to provide two input files:
 1. An Excel file containing the data to be matched. Example provided: `metadata_example.xlsx` 
 2. JSON files containing the reference data for matching. Examples provided in `ocl_source_snapshots`: `MSF_Source_Filtered_20240712_163433.json` for MSF Source and `CIEL_Source_Filtered_20240708_153712.json` for CIEL Source
 
-You can configure the destination columns where to write the suggested matches:
+You can configure the destination columns where to write the suggested matches, for each OCL source provided:
 - `source_filepath`: The file path of the JSON file containing the concepts from the OCL source.
 - `suggestion_column`: The name of the column in the metadata Excel file that contains the suggestions for matching concepts.
 - `external_id_column`: The name of the column in the metadata Excel file that contains the external IDs of the concepts.
