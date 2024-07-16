@@ -22,4 +22,4 @@ jobs:
 
     - name: Run pylint
       run: |
-        pylint OCL\ Concept\ Automatch/matcher.py Xlsx\ to\ O3\ Form\ Schemas/xlsx_to_openmrs3_forms.py
+        pylint $(git ls-files '*.py')
