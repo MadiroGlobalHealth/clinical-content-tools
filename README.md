@@ -4,9 +4,13 @@
 
 This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using OpenConceptLab (OCL) and OpenMRS 3 Forms. The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
 
-## Key features
-1. **OCL concept automatching**: The Python script `matcher.py` automates the process of matching OCL concepts.
-2. **XLSX to O3 form schema conversion**: The Python script `xlsx_to_openmrs3_forms.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
+## Python scripts
+1. **OCL concept automatching**: `matcher.py` automates the process of matching OCL concepts.
+2. **XLSX to O3 form schema conversion**: `converter.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
+
+## Tooling scripts
+3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch. 
+4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance. 
 
 ## Requirements
 
@@ -70,14 +74,14 @@ python matcher.py
 
 The script will read the configuration from the `config.json` file, process the concepts, and generate the form schemas based on the matching results.
 
-### Usage and configuration for `xlsx_to_openmrs3_forms.py` 
+### Usage and configuration for `converter.py` 
 
-Similarly to `matcher.py`, use the `xlsx_to_openmrs3_forms.py` script with the provided in the Excel file containing the form configuration metadata.
+Similarly to `matcher.py`, use the `converter.py` script with the provided in the Excel file containing the form configuration metadata.
 
 To run the script, use the following command:
 
 ```bash
-python xlsx_to_openmrs3_forms.py
+python converter.py
 ```
 The script will then generate OpenMRS 3 form configurations and translation files from the data in the Excel file, and store them in the folder `generated_form_schemas`. Then you can copy-paste them directly into OpenMRS Initializer folder or Form Builder UI. 
 
@@ -97,7 +101,7 @@ The Clinical Content Management Tools project is made possible thanks to [OpenCo
 
 ## Contact
 
-For any questions or inquiries, please contact [Michael Bontyes](https://github.com/michaelbontyes) or reach out to the OpenConceptLab Squad and OpenMRS community.
+For any questions, please contact [Michael Bontyes](https://github.com/michaelbontyes) or reach out to the OpenConceptLab Squad and OpenMRS community.
 
 <div>
 <img src="https://www.msf.org/themes/custom/msf_theme/ogimage.jpg" height=60px>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

@@ -1,15 +1,29 @@
 {
-    "sheets": [
-      "F06-PHQ-9",
+    "SHEETS_TO_MATCH": [
+      "F01-MHPSS Baseline", 
+      "F02-MHPSS Follow-up", 
+      "F03-mhGAP Baseline", 
+      "F04-mhGAP Follow-up", 
+      "F05-MH Closure", 
+      "F06-PHQ-9", 
       "OptionSets"
     ],
+    "SHEETS_TO_PREVIEW": [
+      "F01-MHPSS Baseline", 
+      "F02-MHPSS Follow-up", 
+      "F03-mhGAP Baseline", 
+      "F04-mhGAP Follow-up", 
+      "F05-MH Closure", 
+      "F06-PHQ-9"
+    ],
     "OCL_URL": "https://app.openconceptlab.org/#",
-    "FUZZY_THRESHOLD": 95,
-    "METADATA_FILEPATH": "./metadata_example.xlsx",
+    "FETCHER_BASE_URL": "https://api.openconceptlab.org/orgs/MSF/sources/MSF",
+    "FUZZY_THRESHOLD": 90,
+    "METADATA_FILEPATH": "./LIME EMR - Iraq Metadata - Release 1 (28).xlsx",
     "OUTPUT_DIR": "./generated_form_schemas",
     "automatch_references": {
       "MSF": {
-        "source_filepath": "./ocl_source_snapshots/MSF_Source_Filtered_20240712_163433.json",
+        "source_filepath": "./ocl_source_snapshots/MSF_Source_20240716_220210.json",
         "suggestion_column": "MSF Source Suggestion",
         "external_id_column": "MSF Source External ID",
         "description_column": "MSF Source Description",
