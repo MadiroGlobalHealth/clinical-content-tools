@@ -5,18 +5,23 @@ import json
 import os
 import re
 import time
+import openpyxl
 import pandas as pd
+
+# Ignore potential warnings related to opening large Excel files
+openpyxl.reader.excel.warnings.simplefilter(action='ignore')
 
 # Load the configuration settings from config.json
 with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 # Extract the configuration settings
-METADATA_FILE = config.get('METADATA_FILE', 'metadata_example.xlsx')
+METADATA_FILE = config.get('METADATA_FILEPATH')
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 # List of sheets to process
 SHEETS = config.get('SHEETS_TO_PREVIEW', [])
+print(SHEETS)
 
 # Define a global list to store all questions and answers
 ALL_QUESTIONS_ANSWERS = []
@@ -136,7 +141,7 @@ def manage_id(original_id, id_type="question", question_id="None", all_questions
     cleaned_id = re.sub(r'_+', '_', cleaned_id)
     cleaned_id = cleaned_id[0].lower() + cleaned_id[1:]
     if id_type == "answer" and cleaned_id == 'other':
-        cleaned_id = question_id+cleaned_id.capitalize()
+        cleaned_id = str(question_id)+str(cleaned_id.capitalize())
         #print(cleaned_id)
     if all_questions_answers is not None:
         duplicate_count = 1
@@ -435,7 +440,8 @@ for sheet in SHEETS:
     translations_json_data = json.dumps(translations, indent=4)
     try:
         json.loads(json_data)  # Validate JSON format
-        with open(os.path.join(OUTPUT_DIR, f"{sheet}.json"), 'w', encoding='utf-8') as f:
+        form_name_output = sheet.replace(" ", "_")
+        with open(os.path.join(OUTPUT_DIR, f"{form_name_output}.json"), 'w', encoding='utf-8') as f:
             f.write(json_data)
         print(f"Configuration file for form {sheet} generated successfully!")
         json.loads(translations_json_data)  # Validate JSON format

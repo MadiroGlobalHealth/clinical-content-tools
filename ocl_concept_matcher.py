@@ -1,9 +1,13 @@
 "OCL Concepts Matcher to find existing concepts in OCL based on provided Excel metadata"
 import json
 import math
+import time
 import openpyxl
 from rapidfuzz import process, fuzz
 import pandas as pd
+
+# Ignore potential warnings related to opening large Excel files
+openpyxl.reader.excel.warnings.simplefilter(action='ignore')
 
 # Load the configuration settings from config.json
 with open('config.json', 'r', encoding='utf-8') as f:
@@ -24,14 +28,18 @@ SHEETS = config.get('SHEETS_TO_MATCH', [])
 # Columns names from the metadata spreadsheet
 automatch_references = config.get('automatch_references', {})
 
-# Ignore potential warnings related to opening large Excel files
-openpyxl.reader.excel.warnings.simplefilter(action='ignore')
+# Initialize counters
+# Counter for total concepts to match
+TOTAL_ROWS_PROCESSED = 0
 
-# Initialize the counter of concept to match
-CONCEPTS_TO_MATCH = 0
+# Initialize a dictionary to store the count of matches found per source
+matches_per_source = {}
 
-# Initialize the counter of matches found above the threshold
-MATCHES_FOUND = 0
+# Initialize a dictionary to store unique matches per row for all sheets
+unique_matches_per_row_all_sheets = {}
+
+# Start the timer to calculate the time taken to run the code
+start_time = time.time()
 
 # Find the best matches for each primary and secondary label in the metadata spreadsheet
 def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit=5):
@@ -44,6 +52,9 @@ def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit
     :param limit: The maximum number of matches to return
     :return: List of tuples containing the id, match, score, and definition
     """
+    # Initialize the list of best matches
+    results = []
+
     # Combine the primary and secondary values into a single query string
     query = f"{primary} {secondary}"
 
@@ -56,7 +67,6 @@ def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit
         )
 
     # Map the matches back to their corresponding IDs and definitions
-    results = []
     for _, score, match_index in matches:
         if score >= FUZZY_THRESHOLD:
             results.append((
@@ -89,11 +99,11 @@ def find_column_index(worksheet, column_name):
             return idx
     return -1  # Return -1 if the column name is not found
 
-# Initialize the counter for total matches found
-TOTAL_MATCHES_FOUND = 0
-
 # Iterate through the sheets in df that are in the sheets list with headers on row 2
 for sheet_name in SHEETS:
+
+    df = pd.read_excel(METADATA_FILEPATH, sheet_name=sheet_name, header=1)
+    TOTAL_ROWS_PROCESSED += len(df)
 
     # Iterate through each OCL source and look for suggestions for the primary and secondary lookups
     for source_name, source_config in automatch_references.items():
@@ -159,17 +169,38 @@ for sheet_name in SHEETS:
             dataclass_column = find_column_index(ws, source_config['dataclass_column'])
             score_column = find_column_index(ws, source_config['score_column'])
 
+            # Initialize a dictionary to store unique matches per row for the current sheet
+            unique_matches_per_row = {}
+
             # Iterate through each row in the sheet and get
             # the primary and secondary labels to match
             for index, row in df.iterrows():
-                CONCEPTS_TO_MATCH += 1
+
                 primary_lookup = row.get('Label if different') or None
                 secondary_lookup = row.get('Question') or row.get('Answers') or None
 
                 # Get suggestions from each OCL source using closest match
                 # with RapidFuzz using the primary lookup and secondary lookup
                 best_matches = find_best_matches(primary_lookup, secondary_lookup, source_data)
-                TOTAL_MATCHES_FOUND += len(best_matches)
+                # If at least one match is found, increment the MATCHES_FOUND counter by 1
+                # If at least one match is found, increment the MATCHES_FOUND counter by 1
+                if len(best_matches) > 0:
+                    # If matches were found, add the unique row identifier to the dictionary
+                    # with a value of 1 only if the row identifier
+                    # is not already present in the dictionary
+                    # Generate unique key using the row index and sheet name
+                    # Replace spaces with underscores in the row index and sheet name
+                    unique_row_key = f"{index}_{sheet_name.replace(' ', '_')}"
+                    if unique_row_key not in unique_matches_per_row:
+                        # Generate unique key using the row index and sheet name
+                        unique_matches_per_row[unique_row_key] = 1
+                    # Update the count of matches found for the current source
+                    if source_name in matches_per_source:
+                        matches_per_source[source_name] += 1
+                    else:
+                        matches_per_source[source_name] = 1
+
+
                 # Add the suggestions to the Excel sheet
                 for m in best_matches:
                     # Write the suggestion details to the Excel sheet
@@ -190,14 +221,28 @@ for sheet_name in SHEETS:
             # Close the Excel file writer
             workbook.save(METADATA_FILEPATH)
 
-# Count of sources used
-print(f"\nSources used: {len(automatch_references)}")
+        # Add the unique_matches_per_row to the unique_matches_per_row_all_sheets dictionary
+        unique_matches_per_row_all_sheets.update(unique_matches_per_row)
 
-# Show the total number of concepts processed
-CONCEPTS_TO_MATCH = math.ceil(CONCEPTS_TO_MATCH / len(automatch_references))
-print(f"\nTotal concept processed: {CONCEPTS_TO_MATCH}")
+# Calculate the total number of unique matches found
+total_unique_matches_found = sum(unique_matches_per_row_all_sheets.values())
 
-# Show the total number of matches found above the threshold
-percentage_found = (TOTAL_MATCHES_FOUND / CONCEPTS_TO_MATCH) * 100
-rounded_percentage_found = math.ceil(percentage_found)
-print(f"\nTotal matches found: {TOTAL_MATCHES_FOUND} ({rounded_percentage_found}%)")
+# Calculate the percentage of matches found
+percentage_matches_found = (total_unique_matches_found / TOTAL_ROWS_PROCESSED) * 100
+rounded_percentage_matches_found = math.ceil(percentage_matches_found)
+
+# Calculate the time taken to run the code
+end_time = time.time()
+time_taken = end_time - start_time
+
+# Show the final statistics
+print("\nFinal Statistics:")
+print(f"Total row processed: {TOTAL_ROWS_PROCESSED}")
+print(f"Total unique matches found: {total_unique_matches_found}")
+print(f"Percentage of matches found: {rounded_percentage_matches_found}%")
+print(f"Sources used: {len(automatch_references)}")
+print("Matches per source:")
+for source_name, matches_per_source in matches_per_source.items():
+    print(f"{source_name} source: {matches_per_source} matches")
+rounded_time_taken = round(time_taken, 2)
+print(f"Time taken to run: {rounded_time_taken} seconds")
