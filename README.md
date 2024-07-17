@@ -5,8 +5,8 @@
 This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using OpenConceptLab (OCL) and OpenMRS 3 Forms. The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
 
 ## Key features
-1. OCL concept automatching: The Python script `matcher.py` automates the process of matching OCL concepts.
-2. XLSX to O3 form schema conversion: The Python script `xlsx_to_openmrs3_forms.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
+1. **OCL concept automatching**: The Python script `matcher.py` automates the process of matching OCL concepts.
+2. **XLSX to O3 form schema conversion**: The Python script `xlsx_to_openmrs3_forms.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
 
 ## Requirements
 
