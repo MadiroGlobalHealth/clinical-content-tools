@@ -4,13 +4,19 @@
 
 This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using OpenConceptLab (OCL) and OpenMRS 3 Forms. The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
 
+[Here is an explanation/demo video](https://www.loom.com/share/d2d049a21a7347d6a9af951e2e5c0ba9?sid=5bcbc54f-e0e3-4ad7-a039-8ced49af9813)  
+
+<a href="https://www.loom.com/share/d2d049a21a7347d6a9af951e2e5c0ba9?sid=5bcbc54f-e0e3-4ad7-a039-8ced49af9813" target="_blank">
+  <img height="400" alt="Screenshot 2024-07-17 at 11 17 13 PM" src="https://github.com/user-attachments/assets/8b53ec7b-15e8-4eec-b769-83905f8ba40c">
+</a>
+
 ## Python scripts
 1. **OCL concept automatching**: `matcher.py` automates the process of matching OCL concepts.
 2. **XLSX to O3 form schema conversion**: `converter.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
 
 ## Tooling scripts
 3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch. 
-4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance. 
+4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance.
 
 ## Requirements
 
