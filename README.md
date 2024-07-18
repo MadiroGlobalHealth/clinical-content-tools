@@ -2,7 +2,7 @@
 
 # Clinical Content Management Tools
 
-This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using OpenConceptLab (OCL) and OpenMRS 3 Forms. The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
+This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using [OpenConceptLab (OCL)](https://openconceptlab.org/) and [OpenMRS 3 Forms](https://o3-docs.openmrs.org/docs/forms-in-o3/build-forms-with-o3-form-builder.en-US). The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
 
 [Here is an explanation/demo video](https://www.loom.com/share/d2d049a21a7347d6a9af951e2e5c0ba9?sid=5bcbc54f-e0e3-4ad7-a039-8ced49af9813)  
 
