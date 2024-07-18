@@ -13,7 +13,7 @@
     "OUTPUT_DIR": "./generated_form_schemas",
     "automatch_references": {
       "MSF": {
-        "source_filepath": "./ocl_source_snapshots/MSF_Source_20240717_165221_Filtered.json",
+        "source_filepath": "./ocl_source_snapshots/MSF_Source_20240717_220327_Filtered.json",
         "suggestion_column": "MSF Source Suggestion",
         "external_id_column": "MSF Source External ID",
         "description_column": "MSF Source Description",

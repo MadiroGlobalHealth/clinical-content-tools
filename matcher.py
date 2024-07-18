@@ -19,7 +19,7 @@ METADATA_FILEPATH = config.get('METADATA_FILEPATH', './metadata_example.xlsx')
 # Load the OCL Concepts spreadsheet
 OCL_URL = config.get('OCL_URL', 'https://app.openconceptlab.org/#')
 # Matching treshold for fuzzy matching
-FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 95)
+FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 90)
 # Output directory to save the generated form JSONs
 OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
 # Get the list of sheets to process from the configuration settings
@@ -125,11 +125,11 @@ for sheet_name in SHEETS:
                 )
                 description = (
                     item.get('descriptions', [])[0].get('description', '')
-                    if item.get('descriptions', []) else ''
+                    if item.get('descriptions', []) else definition
                 )
                 datatype = item.get('datatype')
                 concept_class = item.get('concept_class')
-                concept_url = item.get('url')
+                concept_url = item.get('URL')
 
                 # If no description is found, use the definition as the description
                 if description == '':
