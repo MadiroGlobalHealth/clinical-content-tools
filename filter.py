@@ -31,5 +31,5 @@ for concept in data:
     filtered_data.append(filtered_concept)
 
 # Save the filtered data to a new JSON file
-with open(FILTERED_FILE, 'w') as file:
+with open(FILTERED_FILE, 'w', encoding='utf-8') as file:
     json.dump(filtered_data, file, indent=4)
