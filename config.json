@@ -1,15 +1,17 @@
 {
     "SHEETS_TO_MATCH": [
-      "F06-PHQ-9", 
+      "F07-ITFC Admission form", 
       "OptionSets"
     ],
     "SHEETS_TO_PREVIEW": [
-      "F06-PHQ-9"
+      "F01-MHPSS Baseline"
+    ],
+    "SHEETS_TO_CREATE_IN_OCL": [
+      "F06-MH-PHQ-9"
     ],
     "OCL_URL": "https://app.openconceptlab.org/#",
     "FETCHER_BASE_URL": "https://api.openconceptlab.org/orgs/MSF/sources/MSF",
     "FUZZY_THRESHOLD": 90,
-    "METADATA_FILEPATH": "./metadata_example.xlsx",
     "OUTPUT_DIR": "./generated_form_schemas",
     "automatch_references": {
       "MSF": {
@@ -30,5 +32,10 @@
         "dataclass_column": "CIEL Source Class",
         "score_column": "CIEL Source Score"
       }
-    }
+    },
+    "OCL_API_URL": "https://api.openconceptlab.org",
+    "SOURCE_ID": "MSF",
+    "COLLECTION_ID": "",
+    "ORG_ID": "MSF",
+    "OCL_PAGE_LIMIT": 0
   }
