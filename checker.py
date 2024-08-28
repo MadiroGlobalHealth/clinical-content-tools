@@ -6,14 +6,17 @@ import json
 import requests
 import csv
 
+# filepath to the json files
+json_file_path = './LIME-EMR/sites/mosul/configs/openmrs/initializer_config/ampathforms/'
+
 # List of JSON files
 json_files = [
-    'generated_form_schemas/F01-MHPSS_Baseline.json', 
-    'generated_form_schemas/F02-MHPSS_Follow-up.json', 
-    'generated_form_schemas/F03-mhGAP_Baseline.json',
-    'generated_form_schemas/F04-mhGAP_Follow-up.json',
-    'generated_form_schemas/F05-MH_Closure.json',
-    'generated_form_schemas/F06-PHQ-9.json'
+    'F01-MHPSS_Baseline.json', 
+    'F02-MHPSS_Follow-up.json', 
+    'F03-mhGAP_Baseline.json',
+    'F04-mhGAP_Follow-up.json',
+    'F05-MH_Closure.json',
+    'F06-PHQ-9.json'
     ]
 
 def find_key_in_json(data, key):
@@ -39,7 +42,8 @@ def main():
     # Create a loop to iterate over all json files
     for form in json_files:
         print(f'Processing {form}')
-        with open(form, 'r') as f:
+        # Open the json file and load its data
+        with open(json_file_path + form, 'r') as f:
             data = json.load(f)
 
             # Extract concept keys and UUIDs
