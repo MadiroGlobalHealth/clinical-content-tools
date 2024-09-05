@@ -5,6 +5,7 @@ import json
 import os
 import re
 import time
+import uuid
 import openpyxl
 import pandas as pd
 
@@ -64,22 +65,26 @@ def safe_json_loads(s):
     except (ValueError, TypeError):
         return None
 
-def manage_rendering(rendering, validation_format):
+def manage_rendering(rendering):
     """
     Manage rendering options.
     """
-    if rendering == 'coded':
+    if rendering == 'radio':
         rendering = 'radio'
-    elif rendering == 'coded' and validation_format == 'multiple choice':
-        rendering = 'radio'
-    elif rendering == 'coded' and validation_format == 'select extended':
-        rendering = 'radio'
+    elif rendering == 'multicheckbox':
+        rendering = 'multiCheckbox'
+    elif rendering == 'inlinemulticheckbox':
+        rendering = 'multiCheckbox'
     elif rendering == 'boolean':
         rendering = 'radio'
     elif rendering == 'numeric':
         rendering = 'numeric'
     elif rendering == 'text':
         rendering = 'text'
+    elif rendering == 'textarea':
+        rendering = 'textarea'
+    elif rendering == 'decimalnumber':
+        rendering = 'number'
     return rendering
 
 def manage_label(original_label):
@@ -142,7 +147,6 @@ def manage_id(original_id, id_type="question", question_id="None", all_questions
     cleaned_id = cleaned_id[0].lower() + cleaned_id[1:]
     if id_type == "answer" and cleaned_id == 'other':
         cleaned_id = str(question_id)+str(cleaned_id.capitalize())
-        #print(cleaned_id)
     if all_questions_answers is not None:
         duplicate_count = 1
         original_cleaned_id = cleaned_id
@@ -182,7 +186,11 @@ def camel_case(text):
     Camel case a string.
     """
     words = text.split()
-    camel_case_text = words[0].lower()  # Move this line outside the function
+    # If text is empty, return UUID
+    if not words or text == '%':
+        return str(uuid.uuid4())
+    # Convert the first word to lowercase and capitalize the rest of the words
+    camel_case_text = words[0].lower()
     for word in words[1:]:
         camel_case_text += word.capitalize()
     return camel_case_text
@@ -248,8 +256,8 @@ def generate_question(row, columns, question_translations):
     original_question_label = (row['Label if different'] if 'Label if different' in columns and
                             pd.notnull(row['Label if different']) else row['Question'])
     question_label_translation = (
-        row['Translation - Question'] if 'Translation - Question' in columns and
-                            pd.notnull(row['Translation - Question']) else None
+        row['Translation'] if 'Translation' in columns and
+                            pd.notnull(row['Translation']) else None
                             )
 
     question_label = manage_label(original_question_label)
@@ -267,7 +275,9 @@ def generate_question(row, columns, question_translations):
     question_required = (str(row['Mandatory']).lower() == 'true' if 'Mandatory' in columns and
                         pd.notnull(row['Mandatory']) else False)
 
-    question_rendering = manage_rendering(question_datatype, validation_format)
+    question_rendering_value = (row['Rendering'].lower() if pd.notnull(row['Rendering']) else 'text')
+
+    question_rendering = manage_rendering(question_rendering_value)
 
     # Build the question JSON
     question = {
@@ -278,17 +288,23 @@ def generate_question(row, columns, question_translations):
         "questionOptions": {
             "rendering": question_rendering,
             "concept": question_concept_id
-        },
-        "validators": safe_json_loads(validation_format)
+        }
     }
+
+    # If question_rendering_value == 'inlineMultiCheckbox' then append a line in question before 'questionOptions' with '"inlineMultiCheckbox": true,'
+    if question_rendering_value == 'inlinemulticheckbox':
+        question['inlineMultiCheckbox'] = True
+
+    if question_rendering_value == 'decimalnumber':
+        question['disallowDecimals'] = False
 
     question_translations[question_label] = question_label_translation
 
     if 'Default value' in columns and pd.notnull(row['Default value']):
         question['default'] = row['Default value']
 
-    if 'Question' in columns and pd.notnull(row['Question']):
-        question['questionInfo'] = question_label
+    if 'Tooltip i' in columns and pd.notnull(row['Tooltip i']):
+        question['questionInfo'] = row['Tooltip i']
 
     if 'Calculation' in columns and pd.notnull(row['Calculation']):
         question['questionOptions']['calculate'] = {"calculateExpression": row['Calculation']}
