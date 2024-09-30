@@ -1,4 +1,5 @@
 {
+    "METADATA_FILEPATH": "metadata_example.xlsx",
     "SHEETS_TO_MATCH": [
       "F06-MH-PHQ-9", 
       "OptionSets"
