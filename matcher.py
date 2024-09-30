@@ -190,10 +190,10 @@ for sheet_name in SHEETS:
                     # is not already present in the dictionary
                     # Generate unique key using the row index and sheet name
                     # Replace spaces with underscores in the row index and sheet name
-                    unique_row_key = f"{index}_{sheet_name.replace(' ', '_')}"
-                    if unique_row_key not in unique_matches_per_row:
+                    UNIQUE_ROW_KEY = f"{index}_{sheet_name.replace(' ', '_')}"
+                    if UNIQUE_ROW_KEY not in unique_matches_per_row:
                         # Generate unique key using the row index and sheet name
-                        unique_matches_per_row[unique_row_key] = 1
+                        unique_matches_per_row[UNIQUE_ROW_KEY] = 1
                     # Update the count of matches found for the current source
                     if source_name in matches_per_source:
                         matches_per_source[source_name] += 1
