@@ -38,5 +38,8 @@
     "SOURCE_ID": "MSF",
     "COLLECTION_ID": "",
     "ORG_ID": "MSF",
-    "OCL_PAGE_LIMIT": 0
+    "OCL_PAGE_LIMIT": 0,
+    "columns": {
+      "TOOLTIP_COLUMN_NAME": "Tooltip i"
+    }
   }
