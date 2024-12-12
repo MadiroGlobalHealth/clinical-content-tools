@@ -18,6 +18,10 @@ with open('config.json', 'r', encoding='utf-8') as f:
 
 # Extract the configuration settings
 METADATA_FILE = config.get('METADATA_FILEPATH')
+
+# Since tooltip name is different in metadata, extract it form Configuration 
+TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
+
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 # List of sheets to process
@@ -237,6 +241,37 @@ def build_skip_logic_expression(expression: str, questions_answers) -> str:
 
     return "Invalid expression format"
 
+
+def should_render_workspace(question_rendering):
+    """
+    Check if a workspace should be rendered
+    """
+    # List of words to check against
+    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle"]
+    
+    for word in other_render_options:
+        if word in question_rendering:
+            return False
+    return True
+
+def get_workspace_button_label(button_label):
+    """
+    Get the button name for the workspace being rendered.
+    """
+    if button_label == 'immunization-form-workspace':
+        button_label = 'Capture patient immunizations'
+    elif button_label == 'order-basket':
+        button_label = 'Order medications'
+    elif button_label == 'appointments-form-workspace':
+        button_label = 'Set the next appointment date'
+    elif button_label == 'patient-vitals-biometrics-form-workspace':
+        button_label = 'Capture patient vitals'
+    elif button_label == 'medications-form-workspace':
+        button_label = 'Active medications'
+    else :
+        button_label = 'Open Workspace'
+    return button_label
+
 def generate_question(row, columns, question_translations):
     """
     Generate a question JSON from a row of the OptionSets sheet.
@@ -264,6 +299,10 @@ def generate_question(row, columns, question_translations):
     question_id = (row['Question ID'] if 'Question ID' in columns and
                         pd.notnull(row['Question ID']) else manage_id(original_question_label))
 
+    original_question_info = (row[TOOLTIP_COLUMN_NAME] if TOOLTIP_COLUMN_NAME in columns and
+                            pd.notnull(row[TOOLTIP_COLUMN_NAME]) else None )
+    question_info = manage_label(original_question_info)
+
     question_concept_id = (row['External ID'] if 'External ID' in columns and
                         pd.notnull(row['External ID']) else question_id)
 
@@ -285,11 +324,21 @@ def generate_question(row, columns, question_translations):
         "label": question_label,
         "type": "obs",
         "required": question_required,
-        "questionOptions": {
-            "rendering": question_rendering,
-            "concept": question_concept_id
-        }
     }
+
+    question_options = {
+        "rendering": question_rendering,
+        "concept": question_concept_id
+    }
+
+    if should_render_workspace(question_rendering):
+        workspace_button_label = get_workspace_button_label(question_rendering)
+        question_options = {
+            "rendering": "workspace-launcher",
+            "buttonLabel": workspace_button_label,
+            "workspaceName": question_rendering
+    }
+    question['questionOptions'] = question_options
 
     # If question_rendering_value == 'inlineMultiCheckbox' then append a line in question before 'questionOptions' with '"inlineMultiCheckbox": true,'
     if question_rendering_value == 'inlinemulticheckbox':
@@ -300,11 +349,15 @@ def generate_question(row, columns, question_translations):
 
     question_translations[question_label] = question_label_translation
 
+    question_validators = safe_json_loads(validation_format)
+    if pd.notnull(question_validators):
+        question['validators'] = question_validators
+
     if 'Default value' in columns and pd.notnull(row['Default value']):
         question['default'] = row['Default value']
 
-    if 'Tooltip i' in columns and pd.notnull(row['Tooltip i']):
-        question['questionInfo'] = row['Tooltip i']
+    if TOOLTIP_COLUMN_NAME in columns and pd.notnull(row[TOOLTIP_COLUMN_NAME]):
+        question['questionInfo'] = question_info
 
     if 'Calculation' in columns and pd.notnull(row['Calculation']):
         question['questionOptions']['calculate'] = {"calculateExpression": row['Calculation']}
@@ -332,7 +385,6 @@ def generate_question(row, columns, question_translations):
             "question_id": question['id'],
             "question_label": question['label'],
             "questionOptions": {
-                "concept": question['questionOptions']['concept'],
                 "answers": question['questionOptions']['answers']
             }
         })
