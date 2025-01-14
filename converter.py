@@ -103,8 +103,8 @@ def manage_label(original_label):
     """
     # Clean the label
     label = remove_prefixes(original_label)
-    # Remove any other non-alphanumeric characters except spaces, (), -, _, /, ., <, and >
-    label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>]', '', label)
+    # Remove any other non-alphanumeric characters except spaces, (), -, _, /, ., <, > and +
+    label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
     # Remove leading ". " prefixes
     label = re.sub(r'^\.\s*', '', label)
     return label
@@ -142,6 +142,8 @@ def manage_id(original_id, id_type="question", question_id="None", all_questions
     # Replace "<"
     cleaned_id = re.sub(r'>', 'More Than', cleaned_id)
     cleaned_id = camel_case(cleaned_id)
+    # Replace '+' characters with 'plus'
+    cleaned_id = re.sub(r'\+', 'Plus', cleaned_id)
     # Remove any other non-alphanumeric characters
     cleaned_id = re.sub(r'[^a-zA-Z0-9_-]', '', cleaned_id)
     # Remove leading and trailing underscores
