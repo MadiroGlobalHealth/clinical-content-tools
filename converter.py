@@ -19,7 +19,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
 # Extract the configuration settings
 METADATA_FILE = config.get('METADATA_FILEPATH')
 
-# Since tooltip name is different in metadata, extract it form Configuration 
+# Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
 
 # Adjust header to start from row 2
@@ -35,7 +35,7 @@ ALL_QUESTIONS_ANSWERS = []
 def get_options(option_set_name):
     """
     Fetch options for a given option set name.
-    
+
     Args:
         option_set_name (str): The name of the option set.
 
@@ -118,7 +118,7 @@ def manage_id(original_id, id_type="question", question_id="None", all_questions
         original_id (str): The original ID.
         id_type (str, optional): The ID type. Defaults to "question".
         question_id (str, optional): The question ID. Defaults to "None".
-        all_questions_answers (list, optional): A list of all questions and their answers. 
+        all_questions_answers (list, optional): A list of all questions and their answers.
         Defaults to None.
 
     Returns:
@@ -248,7 +248,7 @@ def should_render_workspace(question_rendering):
     """
     # List of words to check against
     other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle"]
-    
+
     for word in other_render_options:
         if word in question_rendering:
             return False
@@ -337,8 +337,14 @@ def generate_question(row, columns, question_translations):
             "rendering": "workspace-launcher",
             "buttonLabel": workspace_button_label,
             "workspaceName": question_rendering
-    }
+        }
     question['questionOptions'] = question_options
+
+    # If question_rendering_value == 'markdown' then append key 'value' with the value similar to the label and change the type key to 'markdown'
+    if question_rendering_value == 'markdown':
+        question['value'] = [f"## {question_label}"]
+        question['type'] = 'markdown'
+        question['questionOptions'].pop('concept')
 
     # If question_rendering_value == 'inlineMultiCheckbox' then append a line in question before 'questionOptions' with '"inlineMultiCheckbox": true,'
     if question_rendering_value == 'inlinemulticheckbox':
@@ -372,7 +378,7 @@ def generate_question(row, columns, question_translations):
         question['questionOptions']['answers'] = [
             {
                 "label": manage_label(opt['Answers']),
-                "concept": (opt['External ID'] if 'External ID' in columns and 
+                "concept": (opt['External ID'] if 'External ID' in columns and
                                 pd.notnull(opt['External ID'])
                                 else manage_id(opt['Answers'], id_type="answer",
                                                 question_id=question_id,
@@ -435,7 +441,7 @@ def generate_form(sheet_name, form_translations):
         page_df = df[df['Page'] == page]
 
         form_data["pages"].append({
-            "label": f"{page}", 
+            "label": f"{page}",
             "sections": []
         })
 

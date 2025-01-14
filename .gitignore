@@ -2,3 +2,6 @@
 ~$metadata_example.xlsx
 .DS_Store
 all_questions_answers.json
+
+# Environments
+py-venv
