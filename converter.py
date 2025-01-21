@@ -18,6 +18,8 @@ with open('config.json', 'r', encoding='utf-8') as f:
 
 # Extract the configuration settings
 METADATA_FILE = config.get('METADATA_FILEPATH')
+TRANSLATION_SECTION_COLUMN = 'Translation - Section'
+TRANSLATION_QUESTION_COLUMN = 'Translation - Question'
 
 # Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
@@ -292,9 +294,10 @@ def generate_question(row, columns, question_translations):
     # Manage values and default values
     original_question_label = (row['Label if different'] if 'Label if different' in columns and
                             pd.notnull(row['Label if different']) else row['Question'])
+
     question_label_translation = (
-        row['Translation'] if 'Translation' in columns and
-                            pd.notnull(row['Translation']) else None
+        row[TRANSLATION_QUESTION_COLUMN].replace('"', '').replace("'", '') if TRANSLATION_QUESTION_COLUMN in columns and
+                            pd.notnull(row[TRANSLATION_QUESTION_COLUMN]) else None
                             )
 
     question_label = manage_label(original_question_label)
@@ -399,7 +402,7 @@ def generate_question(row, columns, question_translations):
 
     # Rename the variable inside the 'with' statement
     with open('all_questions_answers.json', 'w', encoding='utf-8') as file:
-        json.dump(ALL_QUESTIONS_ANSWERS, file, indent=4)
+        json.dump(ALL_QUESTIONS_ANSWERS, file, indent=2)
 
     return question
 
@@ -453,6 +456,14 @@ def generate_form(sheet_name, form_translations):
                 section_df['Section'].iloc[0] if pd.notnull(section_df['Section'].iloc[0])
                             else '')
 
+            # Add section label translations to form_translations
+            section_label_translation = (
+                section_df[TRANSLATION_SECTION_COLUMN].iloc[0].replace('"', '').replace("'", '')
+                if TRANSLATION_SECTION_COLUMN in columns and pd.notnull(section_df[TRANSLATION_SECTION_COLUMN].iloc[0])
+                else None
+            )
+            form_translations[section_label] = section_label_translation
+
             questions = [generate_question(row, columns, form_translations)
                         for _, row in section_df.iterrows()
                         if not row.isnull().all() and pd.notnull(row['Question'])]
@@ -485,12 +496,17 @@ def generate_translation_file(form_name, language, translations_list):
     Returns:
         dict: A translation file JSON.
     """
+
+    # Reorganize keys in translations_list alphabetically
+    ordered_translations_list = {k: v for k, v in sorted(translations_list.items(), key=lambda item: item[0])}
+
+    # Build the translation file JSON
     translation_file = {
         "uuid": "",
         "form": form_name,
         "description": f"{language.capitalize()} Translations for '{form_name}'",
         "language": language,
-        "translations": translations_list
+        "translations": ordered_translations_list
     }
 
     return translation_file
@@ -512,8 +528,8 @@ for sheet in SHEETS:
     translations_data = {}
     form, concept_ids, total_questions, total_answers = generate_form(sheet, translations_data)
     translations = generate_translation_file(sheet, 'ar', translations_data)
-    json_data = json.dumps(form, indent=4)
-    translations_json_data = json.dumps(translations, indent=4)
+    json_data = json.dumps(form, indent=2)
+    translations_json_data = json.dumps(translations, indent=2)
     try:
         json.loads(json_data)  # Validate JSON format
         form_name_output = sheet.replace(" ", "_")
