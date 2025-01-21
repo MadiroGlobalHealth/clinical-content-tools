@@ -24,8 +24,55 @@ TRANSLATION_QUESTION_COLUMN = 'Translation - Question'
 # Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
 
+def read_excel_skip_strikeout(filepath, sheet_name=0, header_row=1):
+    """
+    Reads an Excel sheet, skipping any row that has strikethrough formatting
+    in any cell. Returns a Pandas DataFrame.
+
+    :param filepath: Path to the Excel file
+    :param sheet_name: Sheet name or index (0-based) to read
+    :param header_row: Which row in Excel is the header (1-based index)
+    :return: Pandas DataFrame with rows containing strikethrough removed
+    """
+    # Load workbook (use data_only=True if you only need computed values)
+    wb = openpyxl.load_workbook(filepath, data_only=True)
+    ws = wb[sheet_name]
+
+    # Convert 1-based to 0-based index for Python lists
+    header_idx = header_row - 1
+
+    # Grab all rows as openpyxl cell objects (not values_only=True,
+    # so we can read formatting info).
+    all_rows = list(ws.iter_rows())
+
+    # Identify the header row cells and extract the column names
+    header_cells = all_rows[header_idx]
+    column_names = [cell.value for cell in header_cells]
+
+    data = []
+    # Iterate over the remaining rows after the header
+    for row_idx in range(header_idx + 1, len(all_rows)):
+        row_cells = all_rows[row_idx]
+        row_has_strike = False
+        row_values = []
+
+        for cell in row_cells:
+            # Check if the cell has a font and if that font uses strikethrough
+            if cell.font and cell.font.strike:
+                row_has_strike = True
+                break  # No need to check other cells in this row
+            row_values.append(cell.value)
+
+        if not row_has_strike:
+            data.append(row_values)
+
+    # Create a DataFrame from the filtered data
+    df = pd.DataFrame(data, columns=column_names)
+    return df
+
 # Adjust header to start from row 2
-option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
+#option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
+option_sets = read_excel_skip_strikeout(filepath=METADATA_FILE, sheet_name='OptionSets', header_row=2)
 # List of sheets to process
 SHEETS = config.get('SHEETS_TO_PREVIEW', [])
 print(SHEETS)
@@ -104,12 +151,13 @@ def manage_label(original_label):
         str: The cleaned label.
     """
     # Clean the label
-    label = remove_prefixes(original_label)
+    # label = remove_prefixes(original_label)
     # Remove any other non-alphanumeric characters except spaces, (), -, _, /, ., <, > and +
-    label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
+    # label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
     # Remove leading ". " prefixes
-    label = re.sub(r'^\.\s*', '', label)
-    return label
+    # label = re.sub(r'^\.\s*', '', label)
+    
+    return original_label
 
 # Manage IDs
 def manage_id(original_id, id_type="question", question_id="None", all_questions_answers=None):
@@ -429,8 +477,10 @@ def generate_form(sheet_name, form_translations):
         "pages": []
     }
 
-    # Adjust header to start from row 2
-    df = pd.read_excel(METADATA_FILE, sheet_name=sheet_name, header=1)
+    # Adjust header to start from row 2 and keep Excel font formatting including strike out characters
+    #df = pd.read_excel(METADATA_FILE, sheet_name=sheet_name, header=1)
+    df = read_excel_skip_strikeout(filepath=METADATA_FILE, sheet_name=sheet_name, header_row=2)
+
     columns = df.columns.tolist()
 
     # concept_ids is defined here, not inside the function
