@@ -344,7 +344,7 @@ def generate_question(row, columns, question_translations):
                             pd.notnull(row['Label if different']) else row['Question'])
 
     question_label_translation = (
-        row[TRANSLATION_QUESTION_COLUMN].replace('"', '').replace("'", '') if TRANSLATION_QUESTION_COLUMN in columns and
+        row[TRANSLATION_QUESTION_COLUMN].replace('"', '').replace("'", '').replace('\\', '/') if TRANSLATION_QUESTION_COLUMN in columns and
                             pd.notnull(row[TRANSLATION_QUESTION_COLUMN]) else None
                             )
 
@@ -508,7 +508,7 @@ def generate_form(sheet_name, form_translations):
 
             # Add section label translations to form_translations
             section_label_translation = (
-                section_df[TRANSLATION_SECTION_COLUMN].iloc[0].replace('"', '').replace("'", '')
+                section_df[TRANSLATION_SECTION_COLUMN].iloc[0].replace('"', '').replace("'", '').replace('\\', '/')
                 if TRANSLATION_SECTION_COLUMN in columns and pd.notnull(section_df[TRANSLATION_SECTION_COLUMN].iloc[0])
                 else None
             )
@@ -579,7 +579,7 @@ for sheet in SHEETS:
     form, concept_ids, total_questions, total_answers = generate_form(sheet, translations_data)
     translations = generate_translation_file(sheet, 'ar', translations_data)
     json_data = json.dumps(form, indent=2)
-    translations_json_data = json.dumps(translations, indent=2)
+    translations_json_data = json.dumps(translations, ensure_ascii=False, indent=2)
     try:
         json.loads(json_data)  # Validate JSON format
         form_name_output = sheet.replace(" ", "_")
@@ -587,10 +587,9 @@ for sheet in SHEETS:
             f.write(json_data)
         print(f"Configuration file for form {sheet} generated successfully!")
         json.loads(translations_json_data)  # Validate JSON format
-        with open(
-            os.path.join(OUTPUT_DIR, f"{sheet}_translation_ar.json"), 'w', encoding='utf-8'
-            ) as f:
-            f.write(translations_json_data.encode('utf-8').decode('unicode_escape'))
+        translation_file_name_output = sheet.replace(" ", "_")
+        with open(os.path.join(OUTPUT_DIR, f"{translation_file_name_output}_translation_ar.json"), 'w', encoding='utf-8') as f:
+            f.write(translations_json_data)
         print(f"Translation file for form {sheet} generated successfully!")
         print()
     except json.JSONDecodeError as e:
