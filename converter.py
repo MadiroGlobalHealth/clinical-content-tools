@@ -156,7 +156,7 @@ def manage_label(original_label):
     # label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
     # Remove leading ". " prefixes
     # label = re.sub(r'^\.\s*', '', label)
-    
+
     return original_label
 
 # Manage IDs
@@ -299,7 +299,7 @@ def should_render_workspace(question_rendering):
     Check if a workspace should be rendered
     """
     # List of words to check against
-    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle"]
+    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle", "multiCheckbox", "textarea"]
 
     for word in other_render_options:
         if word in question_rendering:
