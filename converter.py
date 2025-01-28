@@ -140,6 +140,19 @@ def manage_rendering(rendering):
         rendering = 'number'
     return rendering
 
+def format_label(original_label):
+    """
+    Format the label.
+    """
+    # Clean the label
+    label = remove_prefixes(original_label)
+    # Remove any other non-alphanumeric characters except spaces, (), -, _, /, ., <, > and +
+    label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
+    # Remove leading ". " prefixes
+    label = re.sub(r'^\.\s*', '', label)
+
+    return label
+
 def manage_label(original_label):
     """
     Manage labels.
@@ -150,12 +163,8 @@ def manage_label(original_label):
     Returns:
         str: The cleaned label.
     """
-    # Clean the label
-    # label = remove_prefixes(original_label)
-    # Remove any other non-alphanumeric characters except spaces, (), -, _, /, ., <, > and +
-    # label = re.sub(r'[^a-zA-Z0-9\s\(\)\-_\/\.<>+]', '', label)
-    # Remove leading ". " prefixes
-    # label = re.sub(r'^\.\s*', '', label)
+    # Format the label
+    # label = format_label(original_label)
 
     return original_label
 
@@ -392,6 +401,7 @@ def generate_question(row, columns, question_translations):
             "workspaceName": question_rendering
         }
     question['questionOptions'] = question_options
+    question.pop('type')
 
     # If question_rendering_value == 'markdown' then append key 'value' with the value similar to the label and change the type key to 'markdown'
     if question_rendering_value == 'markdown':
@@ -431,11 +441,12 @@ def generate_question(row, columns, question_translations):
         question['questionOptions']['answers'] = [
             {
                 "label": manage_label(opt['Answers']),
-                "concept": (opt['External ID'] if 'External ID' in columns and
-                                pd.notnull(opt['External ID'])
-                                else manage_id(opt['Answers'], id_type="answer",
-                                                question_id=question_id,
-                                                all_questions_answers=ALL_QUESTIONS_ANSWERS)),
+                "concept": (manage_id(opt['Answers']) if opt['External ID'] == '#N/A' else
+                    (opt['External ID'] if 'External ID' in columns and
+                        pd.notnull(opt['External ID'])
+                        else manage_id(opt['Answers'], id_type="answer",
+                            question_id=question_id,
+                            all_questions_answers=ALL_QUESTIONS_ANSWERS))),
             }
             for opt in options
         ]
