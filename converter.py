@@ -395,13 +395,14 @@ def generate_question(row, columns, question_translations):
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
+        question.pop('type')
         question_options = {
             "rendering": "workspace-launcher",
             "buttonLabel": workspace_button_label,
             "workspaceName": question_rendering
         }
+
     question['questionOptions'] = question_options
-    question.pop('type')
 
     # If question_rendering_value == 'markdown' then append key 'value' with the value similar to the label and change the type key to 'markdown'
     if question_rendering_value == 'markdown':
