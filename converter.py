@@ -460,6 +460,10 @@ def generate_question(row, columns, question_translations):
             }
         })
 
+    # Pop answers key if answers array is empty
+    if 'answers' in question['questionOptions'] and not question['questionOptions']['answers']:
+        question['questionOptions'].pop('answers')
+
     # Rename the variable inside the 'with' statement
     with open('all_questions_answers.json', 'w', encoding='utf-8') as file:
         json.dump(ALL_QUESTIONS_ANSWERS, file, indent=2)
