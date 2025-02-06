@@ -1,69 +1,45 @@
 {
-    "METADATA_FILEPATH": "LIME EMR - Iraq Metadata - Release 1.xlsx",
-    "SHEETS_TO_MATCH": [
-      "F08-ITFC Admission form",
-      "F09-ITFC Discharge form",
-      "F10-ATFC form",
-      "F11-Family Planning Assessment",
-      "F12-Family Planning Follow-up",
-      "F13-PNC",
-      "F29-MHPSS Baseline v2",
-      "F30-MHPSS Follow-up v2",
-      "F31-mhGAP Baseline v2",
-      "F32-mhGAP Follow-up v2",
-      "F33-MHPSS Closure v2",
-      "F34-mhGAP Closure v2",
-      "F35-MH-PHQ-9 v2",
-      "OptionSets"
-    ],
-    "SHEETS_TO_PREVIEW": [
-      "F08-ITFC Admission form",
-      "F09-ITFC Discharge form",
-      "F10-ATFC form",
-      "F11-Family Planning Assessment",
-      "F12-Family Planning Follow-up",
-      "F13-PNC",
-      "F29-MHPSS Baseline v2",
-      "F30-MHPSS Follow-up v2",
-      "F31-mhGAP Baseline v2",
-      "F32-mhGAP Follow-up v2",
-      "F33-MHPSS Closure v2",
-      "F34-mhGAP Closure v2",
-      "F35-MH-PHQ-9 v2"
-    ],
-    "SHEETS_TO_CREATE_IN_OCL": [
-      "F06-MH-PHQ-9"
-    ],
-    "OCL_URL": "https://app.openconceptlab.org/#",
-    "FETCHER_BASE_URL": "https://api.openconceptlab.org/orgs/MSF/sources/MSF",
-    "FUZZY_THRESHOLD": 90,
-    "OUTPUT_DIR": "./generated_form_schemas",
-    "automatch_references": {
-      "MSF": {
-        "source_filepath": "./ocl_source_snapshots/MSF_Source_20240717_220327_Filtered.json",
-        "suggestion_column": "MSF Source Suggestion",
-        "external_id_column": "MSF Source External ID",
-        "description_column": "MSF Source Description",
-        "datatype_column": "MSF Source Datatype",
-        "dataclass_column": "MSF Source Class",
-        "score_column": "MSF Source Score"
-      },
-      "CIEL": {
-        "source_filepath": "./ocl_source_snapshots/CIEL_Source_20240708_153712_Filtered.json",
-        "suggestion_column": "CIEL Source Suggestion",
-        "external_id_column": "CIEL Source External ID",
-        "description_column": "CIEL Source Description",
-        "datatype_column": "CIEL Source Datatype",
-        "dataclass_column": "CIEL Source Class",
-        "score_column": "CIEL Source Score"
-      }
+  "METADATA_FILEPATH": "metadata_example.xlsx",
+  "SHEETS_TO_MATCH": [
+    "F06-MH-PHQ-9",
+    "OptionSets"
+  ],
+  "SHEETS_TO_PREVIEW": [
+    "F01-MHPSS Baseline"
+  ],
+  "SHEETS_TO_CREATE_IN_OCL": [
+    "F06-MH-PHQ-9"
+  ],
+  "OCL_URL": "https://app.openconceptlab.org/#",
+  "FETCHER_BASE_URL": "https://api.openconceptlab.org/orgs/MSF/sources/MSF",
+  "FUZZY_THRESHOLD": 90,
+  "OUTPUT_DIR": "./generated_form_schemas",
+  "automatch_references": {
+    "MSF": {
+      "source_filepath": "./ocl_source_snapshots/MSF_Source_20240717_220327_Filtered.json",
+      "suggestion_column": "MSF Source Suggestion",
+      "external_id_column": "MSF Source External ID",
+      "description_column": "MSF Source Description",
+      "datatype_column": "MSF Source Datatype",
+      "dataclass_column": "MSF Source Class",
+      "score_column": "MSF Source Score"
     },
-    "OCL_API_URL": "https://api.openconceptlab.org",
-    "SOURCE_ID": "MSF",
-    "COLLECTION_ID": "",
-    "ORG_ID": "MSF",
-    "OCL_PAGE_LIMIT": 0,
-    "columns": {
-      "TOOLTIP_COLUMN_NAME": "Tooltip i"
+    "CIEL": {
+      "source_filepath": "./ocl_source_snapshots/CIEL_Source_20240708_153712_Filtered.json",
+      "suggestion_column": "CIEL Source Suggestion",
+      "external_id_column": "CIEL Source External ID",
+      "description_column": "CIEL Source Description",
+      "datatype_column": "CIEL Source Datatype",
+      "dataclass_column": "CIEL Source Class",
+      "score_column": "CIEL Source Score"
     }
+  },
+  "OCL_API_URL": "https://api.openconceptlab.org",
+  "SOURCE_ID": "MSF",
+  "COLLECTION_ID": "",
+  "ORG_ID": "MSF",
+  "OCL_PAGE_LIMIT": 0,
+  "columns": {
+    "TOOLTIP_COLUMN_NAME": "Tooltip i"
   }
+}
