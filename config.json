@@ -1,11 +1,11 @@
 {
   "METADATA_FILEPATH": "metadata_example.xlsx",
   "SHEETS_TO_MATCH": [
-    "F06-MH-PHQ-9",
+    "F06-PHQ-9",
     "OptionSets"
   ],
   "SHEETS_TO_PREVIEW": [
-    "F01-MHPSS Baseline"
+    "F06-PHQ-9"
   ],
   "SHEETS_TO_CREATE_IN_OCL": [
     "F06-MH-PHQ-9"
