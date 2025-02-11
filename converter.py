@@ -604,7 +604,7 @@ for sheet in SHEETS:
         print(f"Configuration file for form {sheet} generated successfully!")
         json.loads(translations_json_data)  # Validate JSON format
         translation_file_name_output = sheet.replace(" ", "_")
-        with open(os.path.join(OUTPUT_DIR, f"{translation_file_name_output}_translation_ar.json"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(OUTPUT_DIR, f"{translation_file_name_output}_translations_ar.json"), 'w', encoding='utf-8') as f:
             f.write(translations_json_data)
         print(f"Translation file for form {sheet} generated successfully!")
         print()
