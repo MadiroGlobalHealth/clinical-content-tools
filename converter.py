@@ -333,6 +333,66 @@ def get_workspace_button_label(button_label):
         button_label = 'Open Workspace'
     return button_label
 
+
+def build_api_calculation(concept_id, datatype='', readonly=True):
+    """
+    Builds an API-based calculation expression based on the datatype.
+
+    Args:
+        concept_id (str): The concept ID to fetch
+        datatype (str): The datatype of the observation ('text', 'numeric', 'coded', etc.)
+        readonly (bool): Whether the field should be readonly
+
+    Returns:
+        dict: A calculation object
+    """
+    if datatype.lower() == 'numeric':
+        value_accessor = "valueQuantity?.value"
+    elif datatype.lower() == 'coded':
+        value_accessor = "valueCodableConcept?.code"
+    else:  # default to text
+        value_accessor = "valueString"
+
+    calculate_expression = f"api.getLatestObs(patient.id, '{concept_id}').then(obs => obs?.{value_accessor})"
+
+    return {
+        "calculateExpression": calculate_expression,
+        "readonly": readonly
+    }
+
+
+def process_calculation(calculation, datatype='', concept_id=None):
+    """
+    Process the calculation field and return appropriate calculation object.
+
+    Args:
+        calculation: The calculation value from the Excel sheet
+        datatype: The datatype of the field
+        concept_id: The concept ID for the question
+
+    Returns:
+        dict: A calculation object
+    """
+    try:
+        # Check if the calculation is "previous" or "latest" (for API-based calculations)
+        if isinstance(calculation, str) and calculation.lower() in ['previous', 'latest']:
+            if concept_id:
+                return build_api_calculation(concept_id, datatype)
+            return None
+
+        calc_json = json.loads(calculation)
+        if isinstance(calc_json, dict):
+            if 'calculateExpression' in calc_json:
+                return calc_json
+            else:
+                return {"calculateExpression": json.dumps(calc_json)}
+        else:
+            return {"calculateExpression": calculation}
+
+    except (json.JSONDecodeError, AttributeError):
+        # If not valid JSON, treat as regular calculation expression
+        return {"calculateExpression": calculation}
+
 def generate_question(row, columns, question_translations):
     """
     Generate a question JSON from a row of the OptionSets sheet.
@@ -430,7 +490,10 @@ def generate_question(row, columns, question_translations):
         question['questionInfo'] = question_info
 
     if 'Calculation' in columns and pd.notnull(row['Calculation']):
-        question['questionOptions']['calculate'] = {"calculateExpression": row['Calculation']}
+        calculation = row['Calculation']
+        calculated_result = process_calculation(calculation, question_datatype, question_concept_id)
+        if calculated_result:
+            question_options['calculate'] = calculated_result
 
     if 'Skip logic' in columns and pd.notnull(row['Skip logic']):
         question['hide'] = {"hideWhenExpression": build_skip_logic_expression(
