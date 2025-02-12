@@ -6,8 +6,5 @@ all_questions_answers.json
 # EMR Specific files
 LIME*.xlsx
 
-# Generated files
-generated_form_schemas/*
-
 # Environments
 py-venv

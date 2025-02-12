@@ -1,5 +1,5 @@
 {
-  "METADATA_FILEPATH": "metadata_example.xlsx",
+  "METADATA_FILEPATH": "LIME EMR - Iraq Metadata - Release 1.xlsx",
   "SHEETS_TO_MATCH": [
     "F06-PHQ-9",
     "OptionSets"
@@ -8,7 +8,7 @@
     "F06-PHQ-9"
   ],
   "SHEETS_TO_CREATE_IN_OCL": [
-    "F06-MH-PHQ-9"
+    "F06-PHQ-9"
   ],
   "OCL_URL": "https://app.openconceptlab.org/#",
   "FETCHER_BASE_URL": "https://api.openconceptlab.org/orgs/MSF/sources/MSF",
