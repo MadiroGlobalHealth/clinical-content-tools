@@ -360,6 +360,30 @@ def build_api_calculation(concept_id, datatype='', readonly=True):
         "readonly": readonly
     }
 
+def build_reference_calculation(referenced_question_id, datatype=''):
+    """
+    Builds a calculation expression that references another question's value
+    in the same form using the API format.
+
+    Args:
+        referenced_question_id (str): The ID of the question of whose value we want to reference
+        datatype (str): The datatype of the observation ('text', 'numeric', 'coded', etc.)
+
+    Returns:
+        dict: A calculation object
+    """
+    # Determine the value accessor based on datatype
+    if datatype.lower() == 'numeric':
+        value_accessor = "valueQuantity?.value"
+    elif datatype.lower() == 'coded':
+        value_accessor = "valueCodableConcept?.code"
+    else:  # default to text
+        value_accessor = "valueString"
+
+    return {
+        "calculateExpression": f"api.getLatestObs(patient.id, '{referenced_question_id}').then(obs => obs?.{value_accessor})",
+        "readonly": True
+    }
 
 def process_calculation(calculation, datatype='', concept_id=None):
     """
@@ -374,12 +398,20 @@ def process_calculation(calculation, datatype='', concept_id=None):
         dict: A calculation object
     """
     try:
-        # Check if the calculation is "previous" or "latest" (for API-based calculations)
-        if isinstance(calculation, str) and calculation.lower() in ['previous', 'latest']:
-            if concept_id:
-                return build_api_calculation(concept_id, datatype)
-            return None
+        # Check if it's a special keyword
+        if isinstance(calculation, str):
+            calc_lower = calculation.lower()
+            if calc_lower in ['previous', 'latest']:
+                # Get previous value of this concept
+                if concept_id:
+                    return build_api_calculation(concept_id, datatype)
+                return None
+            elif calc_lower.startswith('ref:'):
+                # Reference another question's value
+                referenced_id = calculation[4:].strip()  # Remove 'ref:' prefix
+                return build_reference_calculation(referenced_id, datatype)
 
+        # Try parsing as JSON
         calc_json = json.loads(calculation)
         if isinstance(calc_json, dict):
             if 'calculateExpression' in calc_json:
@@ -390,7 +422,6 @@ def process_calculation(calculation, datatype='', concept_id=None):
             return {"calculateExpression": calculation}
 
     except (json.JSONDecodeError, AttributeError):
-        # If not valid JSON, treat as regular calculation expression
         return {"calculateExpression": calculation}
 
 def generate_question(row, columns, question_translations):

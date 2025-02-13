@@ -2,20 +2,22 @@
 
 # Clinical Content Management Tools
 
-This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using [OpenConceptLab (OCL)](https://openconceptlab.org/) and [OpenMRS 3 Forms](https://o3-docs.openmrs.org/docs/forms-in-o3/build-forms-with-o3-form-builder.en-US). The tools are designed to automate repetitive tasks across various implementers, facilities, and forms. 
+This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using [OpenConceptLab (OCL)](https://openconceptlab.org/) and [OpenMRS 3 Forms](https://o3-docs.openmrs.org/docs/forms-in-o3/build-forms-with-o3-form-builder.en-US). The tools are designed to automate repetitive tasks across various implementers, facilities, and forms.
 
-[Here is an explanation/demo video](https://www.youtube.com/watch?v=s9S4FaZib1U)  
+[Here is an explanation/demo video](https://www.youtube.com/watch?v=s9S4FaZib1U)
 
 <a href="https://www.loom.com/share/d2d049a21a7347d6a9af951e2e5c0ba9?sid=5bcbc54f-e0e3-4ad7-a039-8ced49af9813" target="_blank">
   <img height="400" alt="Screenshot 2024-07-17 at 11 17 13 PM" src="https://github.com/user-attachments/assets/8b53ec7b-15e8-4eec-b769-83905f8ba40c">
 </a>
 
 ## Python scripts
+
 1. **OCL concept automatching**: `matcher.py` automates the process of matching OCL concepts.
 2. **XLSX to O3 form schema conversion**: `converter.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
 
 ## Tooling scripts
-3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch. 
+
+3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch.
 4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance.
 
 ## Requirements
@@ -54,16 +56,17 @@ To get started with the Clinical Content Management Tools, follow these steps:
 - `OUTPUT_DIR`: The directory where the generated form schemas will be saved.
 - `automatch_references`: A dictionary containing the details of the OCL sources to be used for matching. Each key in the dictionary represents a source name, and the corresponding value is another dictionary containing the source details.
 
-### Usage and configuration for `matcher.py` 
+### Usage and configuration for `matcher.py`
 
 The `matcher.py` script is designed to automate the process of matching OCL concepts based on the provided configuration settings. Below is a detailed explanation of the configuration parameters and their usage.
 
 To use the `matcher.py` script, you need to provide two input files:
 
-1. An Excel file containing the data to be matched. Example provided: `metadata_example.xlsx` 
+1. An Excel file containing the data to be matched. Example provided: `metadata_example.xlsx`
 2. JSON files containing the reference data for matching. Examples provided in `ocl_source_snapshots`: `MSF_Source_Filtered_20240712_163433.json` for MSF Source and `CIEL_Source_Filtered_20240708_153712.json` for CIEL Source
 
 You can configure the destination columns where to write the suggested matches, for each OCL source provided:
+
 - `source_filepath`: The file path of the JSON file containing the concepts from the OCL source.
 - `suggestion_column`: The name of the column in the metadata Excel file that contains the suggestions for matching concepts.
 - `external_id_column`: The name of the column in the metadata Excel file that contains the external IDs of the concepts.
@@ -80,7 +83,7 @@ python matcher.py
 
 The script will read the configuration from the `config.json` file, process the concepts, and generate the form schemas based on the matching results.
 
-### Usage and configuration for `converter.py` 
+### Usage and configuration for `converter.py`
 
 Similarly to `matcher.py`, use the `converter.py` script with the provided in the Excel file containing the form configuration metadata.
 
@@ -89,7 +92,70 @@ To run the script, use the following command:
 ```bash
 python converter.py
 ```
-The script will then generate OpenMRS 3 form configurations and translation files from the data in the Excel file, and store them in the folder `generated_form_schemas`. Then you can copy-paste them directly into OpenMRS Initializer folder or Form Builder UI. 
+
+The script will generate OpenMRS 3 form configurations and translation files from the data in the Excel file, and store them in the folder `generated_form_schemas`. Then you can copy-paste them directly into OpenMRS Initializer folder or Form Builder UI.
+
+#### Calculation Features
+
+The form generator supports two main types of calculations that can be configured in the Excel metadata file:
+
+1. **Previous Observation Values**: Fetch the most recent observation value for a concept from previous encounters
+2. **Cross-References**: Reference values from other questions within the same form
+
+##### Fetching Previous Values
+
+To fetch a value from previous encounters, add `previous` or `latest` in the Calculation column:
+
+```
+Question         | External ID            | Datatype | Calculation
+-----------------|------------------------|----------|------------
+Last PHQ-9 score | depressionSeverityScale| coded    | previous
+```
+
+This will generate a calculation that fetches the most recent value:
+
+```json
+{
+  "calculateExpression": "api.getLatestObs(patient.id, 'depressionSeverityScale').then(obs => obs?.valueCodableConcept?.code)",
+  "readonly": true
+}
+```
+
+##### Cross-Referencing Questions
+
+To reference another question's value within the same form, use `ref:` prefix followed by the question ID:
+
+```
+Question        | External ID    | Datatype  | Calculation
+----------------|----------------|-----------|-------------
+MHOS score      | mhos_score     | numeric   |
+Last MHOS score | last_mhos_score| numeric   | ref:mhosScore
+```
+
+This will generate:
+
+```json
+{
+  "calculateExpression": "api.getLatestObs(patient.id, 'mhosScore').then(obs => obs?.valueQuantity?.value)",
+  "readonly": true
+}
+```
+
+##### Important Notes:
+
+1. **Value Accessors**: The script automatically selects the correct value accessor based on datatype:
+
+   - `numeric`: `valueQuantity?.value`
+   - `coded`: `valueCodableConcept?.code`
+   - `text`: `valueString`
+
+2. **Required Fields**:
+
+   - For previous values: External ID must be filled
+   - For cross-references: Referenced question ID must exist in the form
+   - Datatype must be correctly specified
+
+3. **Readonly Behavior**: All calculated fields are set as readonly by default
 
 
 ## Contributing
