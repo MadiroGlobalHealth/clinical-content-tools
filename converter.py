@@ -8,6 +8,10 @@ import time
 import uuid
 import openpyxl
 import pandas as pd
+from dotenv import load_dotenv
+
+# Load the environment variables
+load_dotenv()
 
 # Ignore potential warnings related to opening large Excel files
 openpyxl.reader.excel.warnings.simplefilter(action='ignore')
@@ -17,7 +21,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 # Extract the configuration settings
-METADATA_FILE = config.get('METADATA_FILEPATH')
+METADATA_FILE = os.getenv('METADATA_FILEPATH', './metadata_example.xlsx')
 TRANSLATION_SECTION_COLUMN = 'Translation - Section'
 TRANSLATION_QUESTION_COLUMN = 'Translation - Question'
 
@@ -74,7 +78,7 @@ def read_excel_skip_strikeout(filepath, sheet_name=0, header_row=1):
 #option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 option_sets = read_excel_skip_strikeout(filepath=METADATA_FILE, sheet_name='OptionSets', header_row=2)
 # List of sheets to process
-SHEETS = config.get('SHEETS_TO_PREVIEW', [])
+SHEETS = os.getenv('SHEETS_TO_PREVIEW', ['F06-PHQ-9']).split(',')
 print(SHEETS)
 
 # Define a global list to store all questions and answers

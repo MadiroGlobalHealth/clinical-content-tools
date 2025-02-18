@@ -9,6 +9,10 @@ import uuid
 import openpyxl
 import requests
 import pandas as pd
+from dotenv import load_dotenv
+
+# Load the environment variables
+load_dotenv()
 
 # Ignore potential warnings related to opening large Excel files
 openpyxl.reader.excel.warnings.simplefilter(action='ignore')
@@ -35,11 +39,11 @@ HEADERS = {
 }
 
 # Extract the configuration settings
-METADATA_FILE = config.get('METADATA_FILEPATH')
+METADATA_FILE = os.getenv('METADATA_FILEPATH')
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 # List of sheets to process
-SHEETS = config.get('SHEETS_TO_PREVIEW', [])
+SHEETS = os.getenv('SHEETS_TO_PREVIEW', ['F06-PHQ-9']).split(',')
 # Add sheet "optionSets" to the list of sheets to process
 SHEETS.append('OptionSets')
 
@@ -61,7 +65,7 @@ for sheet_name in SHEETS:
         external_id = row['External ID']
         translation = str(row['Translation'])  # Convert translation to string
         # If the external ID is found and the translation is not null or NaN or nan
-        if external_id and translation and not pd.isna(translation) and translation.lower()!= 'nan':        
+        if external_id and translation and not pd.isna(translation) and translation.lower()!= 'nan':
             # Get the concept ID using the ocl_concepts
             concept_id = next((c['id'] for c in ocl_concepts if c['external_id'] == external_id), None)
             if concept_id:
@@ -112,4 +116,4 @@ for external_id, translation_info in translation_dict.items():
                 print(f'Added AR translation {translation} for {concept_id}')
             else:
                 print(f'Failed to add AR translation {translation} for {concept_id}: Status code {response.status_code}')
-                
+

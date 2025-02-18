@@ -17,6 +17,7 @@ This repository aims to provide a set of scripts and utilities to (hopefully) fa
 
 ## Tooling scripts
 
+
 3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch.
 4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance.
 
@@ -46,6 +47,13 @@ To get started with the Clinical Content Management Tools, follow these steps:
 5. Install the required dependencies: `pip install -r requirements.txt`
 
 ## Getting started
+
+Create a `.env` file from the provided `.env.example` file and update in the required environment variables. You could also use the default values provided in the `.env.example` file for testing purposes.
+
+```bash
+cp .env.example .env
+```
+This file contains the common configuration variables. You can modify the values as needed.
 
 ### Common configuration file
 
@@ -156,7 +164,6 @@ This will generate:
    - Datatype must be correctly specified
 
 3. **Readonly Behavior**: All calculated fields are set as readonly by default
-
 
 ## Contributing
 
