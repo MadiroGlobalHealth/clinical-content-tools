@@ -1,12 +1,4 @@
 {
-  "METADATA_FILEPATH": "LIME EMR - Iraq Metadata - Release 1.xlsx",
-  "SHEETS_TO_MATCH": [
-    "F06-PHQ-9",
-    "OptionSets"
-  ],
-  "SHEETS_TO_PREVIEW": [
-    "F06-PHQ-9"
-  ],
   "SHEETS_TO_CREATE_IN_OCL": [
     "F06-PHQ-9"
   ],

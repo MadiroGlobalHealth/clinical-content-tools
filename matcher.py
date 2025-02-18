@@ -1,10 +1,15 @@
 "OCL Concepts Matcher to find existing concepts in OCL based on provided Excel metadata"
 import json
+import os
 import math
 import time
 import openpyxl
 from rapidfuzz import process, fuzz
 import pandas as pd
+from dotenv import load_dotenv
+
+# Load the environment variables
+load_dotenv()
 
 # Ignore potential warnings related to opening large Excel files
 openpyxl.reader.excel.warnings.simplefilter(action='ignore')
@@ -15,7 +20,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
 
 # Extract the configuration settings
 # Load the metadata spreadsheet
-METADATA_FILEPATH = config.get('METADATA_FILEPATH', './metadata_example.xlsx')
+METADATA_FILEPATH = os.getenv('METADATA_FILEPATH', './metadata_example.xlsx')
 # Load the OCL Concepts spreadsheet
 OCL_URL = config.get('OCL_URL', 'https://app.openconceptlab.org/#')
 # Matching treshold for fuzzy matching
@@ -23,7 +28,8 @@ FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 90)
 # Output directory to save the generated form JSONs
 OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
 # Get the list of sheets to process from the configuration settings
-SHEETS = config.get('SHEETS_TO_MATCH', [])
+SHEETS_TO_MATCH = os.getenv('SHEETS_TO_PREVIEW', 'F06-PHQ-9').split(',')
+SHEETS = SHEETS_TO_MATCH.append('OptionSets')
 
 # Columns names from the metadata spreadsheet
 automatch_references = config.get('automatch_references', {})
