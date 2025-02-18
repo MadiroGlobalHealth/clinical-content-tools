@@ -8,3 +8,4 @@ LIME*.xlsx
 
 # Environments
 py-venv
+.env
