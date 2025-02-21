@@ -312,7 +312,7 @@ def should_render_workspace(question_rendering):
     Check if a workspace should be rendered
     """
     # List of words to check against
-    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle", "multiCheckbox", "textarea"]
+    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle", "multiCheckbox", "textarea", "numeric"]
 
     for word in other_render_options:
         if word in question_rendering:
@@ -397,32 +397,21 @@ def generate_question(row, columns, question_translations):
         "concept": question_concept_id
     }
 
-    # Store min/max values if rendering is numeric/number
-    min_value = None
-    max_value = None
+    # Add min/max values if rendering is numeric/number
     if question_rendering in ['numeric', 'number']:
         if 'Lower limit' in columns and pd.notnull(row['Lower limit']):
-            min_value = int(row['Lower limit'])
-            question_options['min'] = min_value
+            question_options['min'] = int(row['Lower limit'])
         if 'Upper limit' in columns and pd.notnull(row['Upper limit']):
-            max_value = int(row['Upper limit'])
-            question_options['max'] = max_value
+            question_options['max'] = int(row['Upper limit'])
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
         question.pop('type')
-        # Create new question_options while preserving min/max
-        updated_options = {
+        question_options = {
             "rendering": "workspace-launcher",
             "buttonLabel": workspace_button_label,
             "workspaceName": question_rendering
         }
-        # Add back min/max if they existed
-        if min_value is not None:
-            updated_options['min'] = min_value
-        if max_value is not None:
-            updated_options['max'] = max_value
-        question_options = updated_options
 
     question['questionOptions'] = question_options
 
