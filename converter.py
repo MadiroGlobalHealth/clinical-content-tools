@@ -78,7 +78,7 @@ def read_excel_skip_strikeout(filepath, sheet_name=0, header_row=1):
 #option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 option_sets = read_excel_skip_strikeout(filepath=METADATA_FILE, sheet_name='OptionSets', header_row=2)
 # List of sheets to process
-SHEETS = os.getenv('SHEETS_TO_PREVIEW', ['F06-PHQ-9']).split(',')
+SHEETS = os.getenv('SHEETS_TO_PREVIEW', 'F06-PHQ-9').split(',')
 print(SHEETS)
 
 # Define a global list to store all questions and answers
@@ -397,14 +397,32 @@ def generate_question(row, columns, question_translations):
         "concept": question_concept_id
     }
 
+    # Store min/max values if rendering is numeric/number
+    min_value = None
+    max_value = None
+    if question_rendering in ['numeric', 'number']:
+        if 'Lower limit' in columns and pd.notnull(row['Lower limit']):
+            min_value = int(row['Lower limit'])
+            question_options['min'] = min_value
+        if 'Upper limit' in columns and pd.notnull(row['Upper limit']):
+            max_value = int(row['Upper limit'])
+            question_options['max'] = max_value
+
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
         question.pop('type')
-        question_options = {
+        # Create new question_options while preserving min/max
+        updated_options = {
             "rendering": "workspace-launcher",
             "buttonLabel": workspace_button_label,
             "workspaceName": question_rendering
         }
+        # Add back min/max if they existed
+        if min_value is not None:
+            updated_options['min'] = min_value
+        if max_value is not None:
+            updated_options['max'] = max_value
+        question_options = updated_options
 
     question['questionOptions'] = question_options
 
