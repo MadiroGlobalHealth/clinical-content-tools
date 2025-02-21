@@ -43,7 +43,7 @@ METADATA_FILE = os.getenv('METADATA_FILEPATH')
 # Adjust header to start from row 2
 option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 # List of sheets to process
-SHEETS = os.getenv('SHEETS_TO_PREVIEW', ['F06-PHQ-9']).split(',')
+SHEETS = os.getenv('SHEETS_TO_PREVIEW', 'F06-PHQ-9').split(',')
 # Add sheet "optionSets" to the list of sheets to process
 SHEETS.append('OptionSets')
 

@@ -78,7 +78,7 @@ def read_excel_skip_strikeout(filepath, sheet_name=0, header_row=1):
 #option_sets = pd.read_excel(METADATA_FILE, sheet_name='OptionSets', header=1)
 option_sets = read_excel_skip_strikeout(filepath=METADATA_FILE, sheet_name='OptionSets', header_row=2)
 # List of sheets to process
-SHEETS = os.getenv('SHEETS_TO_PREVIEW', ['F06-PHQ-9']).split(',')
+SHEETS = os.getenv('SHEETS_TO_PREVIEW', 'F06-PHQ-9').split(',')
 print(SHEETS)
 
 # Define a global list to store all questions and answers
@@ -312,7 +312,7 @@ def should_render_workspace(question_rendering):
     Check if a workspace should be rendered
     """
     # List of words to check against
-    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle", "multiCheckbox", "textarea"]
+    other_render_options = ["radio", "number", "text", "date", "time", "markdown", "select", "checkbox", "toggle", "multiCheckbox", "textarea", "numeric"]
 
     for word in other_render_options:
         if word in question_rendering:
@@ -396,6 +396,13 @@ def generate_question(row, columns, question_translations):
         "rendering": question_rendering,
         "concept": question_concept_id
     }
+
+    # Add min/max values if rendering is numeric/number
+    if question_rendering in ['numeric', 'number']:
+        if 'Lower limit' in columns and pd.notnull(row['Lower limit']):
+            question_options['min'] = int(row['Lower limit'])
+        if 'Upper limit' in columns and pd.notnull(row['Upper limit']):
+            question_options['max'] = int(row['Upper limit'])
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
