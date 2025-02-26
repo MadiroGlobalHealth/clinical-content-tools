@@ -6,17 +6,52 @@ This repository aims to provide a set of scripts and utilities to (hopefully) fa
 
 The vision behind this set of tools is to evolve into a user-friendly and **flexible toolkit** covering critical and often cumbersome stages of Health Metadata Management. Here is an **overview and progress** made on each stage:
 ```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#f0f3f7',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#f0f3f7',
+      'lineColor': '#000',
+      'secondaryColor': '#000',
+      'tertiaryColor': '#000'
+    }
+  }
+}%%
 flowchart LR
-    A["<div style='font-size:18px;'><b>Paper-To-Form Converter</b></div><br>🏗️ 1st tests made, prompting refined<br><br>Target release: June 2025"] --> 
-    B["<div style='font-size:18px;'><b>Concept standardization and mapping</b></div><br>🏗️  OCL Mapper v2 in progress<br><br>Target release: June 2025"]
+    A["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Paper-To-Form Converter</b></div>
+         <div><br>🏗️ 1st tests made, prompting refined</div>
+         <div>Target release: June 2025</div>
+         </div>"] --> 
+    B["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Concept standardization and mapping</b></div>
+         <div><br>🏗️ OCL Mapper v2 in progress</div>
+         <div>Target release: June 2025</div>
+         </div>"]
     B --> 
-    C["<div style='font-size:18px;'><b>Content creation assistant for OCL</b></div><br>🗓️ Planned"]
+    C["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Content creation assistant for OCL</b></div>
+         <div><br>🗓️ Planned</div>
+         </div>"]
     C --> 
-    D["<div style='font-size:18px;'><b>Metadata validation assistant</b></div><br>🏗️ Initial tool being prepared"]
+    D["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Metadata validation assistant</b></div>
+         <div><br>🏗️ Initial tool being prepared</div>
+         </div>"]
     D --> 
-    E["<div style='font-size:18px;'><b>Metadata to OpenMRS 3 form generation</b></div><br>🚀 Used with MSF forms<br>Automation coverage: 80%"]
+    E["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Metadata to OpenMRS 3 form generation</b></div>
+         <div><br>🚀 Used with MSF forms</div>
+         <div>Automation coverage: 80%</div>
+         </div>"]
     E --> 
-    F["<div style='font-size:18px;'><b>Metadata to e2e test cases automation</b></div><br>🏗️ 1st tests made, prompting refined<br><br>Target release: June 2025"]
+    F["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
+         <div style='font-size:22px;'><b>Metadata to e2e test cases automation</b></div>
+         <div><br>🏗️ 1st tests made, prompting refined</div>
+         <div>Target release: June 2025</div>
+         </div>"]
 
 ```
 
