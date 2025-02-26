@@ -21,35 +21,35 @@ The vision behind this set of tools is to evolve into a user-friendly and **flex
 }%%
 flowchart LR
     A["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Paper-To-Form Converter</b></div>
-         <div><br>🏗️ 1st tests made, prompting refined</div>
+         <div style='font-size:22px;'><b>🏗️<br><br>Paper-To-Form Converter</b></div>
+         <div><br>1st tests made, prompting refined</div>
          <div>Target release: June 2025</div>
          </div>"] --> 
     B["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Concept standardization and mapping</b></div>
-         <div><br>🏗️ OCL Mapper v2 in progress</div>
+         <div style='font-size:22px;'><b>🏗️<br><br>Concept standardization and mapping</b></div>
+         <div><br>OCL Mapper v2 in progress</div>
          <div>Target release: June 2025</div>
          </div>"]
     B --> 
     C["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Content creation assistant for OCL</b></div>
-         <div><br>🗓️ Planned</div>
+         <div style='font-size:22px;'><b>🗓️<br><br>Content creation assistant for OCL</b></div>
+         <div><br>Planned</div>
          </div>"]
     C --> 
     D["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Metadata validation assistant</b></div>
-         <div><br>🏗️ Initial tool being prepared</div>
+         <div style='font-size:22px;'><b>🏗️<br><br>Metadata validation assistant</b></div>
+         <div><br>Initial tool being prepared</div>
          </div>"]
     D --> 
     E["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Metadata to OpenMRS 3 form generation</b></div>
-         <div><br>🚀 Used with MSF forms</div>
+         <div style='font-size:22px;'><b>🚀<br><br>Metadata to OpenMRS 3 form generation</b></div>
+         <div><br>Used with MSF forms</div>
          <div>Automation coverage: 80%</div>
          </div>"]
     E --> 
     F["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
-         <div style='font-size:22px;'><b>Metadata to e2e test cases automation</b></div>
-         <div><br>🏗️ 1st tests made, prompting refined</div>
+         <div style='font-size:22px;'><b>🏗️<br><br>Metadata to e2e test cases automation</b></div>
+         <div><br>1st tests made, prompting refined</div>
          <div>Target release: June 2025</div>
          </div>"]
 
