@@ -400,9 +400,9 @@ def generate_question(row, columns, question_translations):
     # Add min/max values if rendering is numeric/number
     if question_rendering in ['numeric', 'number']:
         if 'Lower limit' in columns and pd.notnull(row['Lower limit']):
-            question_options['min'] = int(row['Lower limit'])
+            question_options['min'] = row['Lower limit']
         if 'Upper limit' in columns and pd.notnull(row['Upper limit']):
-            question_options['max'] = int(row['Upper limit'])
+            question_options['max'] = row['Upper limit']
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
