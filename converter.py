@@ -62,9 +62,15 @@ def read_excel_skip_strikeout(filepath, sheet_name=0, header_row=1):
 
         for cell in row_cells:
             # Check if the cell has a font and if that font uses strikethrough
-            if cell.font and cell.font.strike:
-                row_has_strike = True
-                break  # No need to check other cells in this row
+            if sheet_name == 'OptionSets':
+                if cell.font and cell.font.strike:
+                    row_has_strike = True
+                    break  # No need to check other cells in this row
+            else:
+                question_cell = row_cells[column_names.index('Question')]
+                if question_cell.font and question_cell.font.strike:
+                    row_has_strike = True
+                    break  # No need to check other cells in this row
             row_values.append(cell.value)
 
         if not row_has_strike:
