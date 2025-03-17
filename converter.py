@@ -344,6 +344,21 @@ def get_workspace_button_label(button_label):
         button_label = 'Open Workspace'
     return button_label
 
+def add_translation(translations, label, translated_string):
+    """
+    Add a translation to the translations dictionary.
+    """
+    if translated_string is None:
+        # LOG: Translation not present for the provided label
+        pass
+    if label in translations:
+        if translations[label] != translated_string:
+            # LOG: Different translations for same label: label
+            pass
+        else:
+            return
+    translations[label] = translated_string
+
 def generate_question(row, columns, question_translations):
     """
     Generate a question JSON from a row of the OptionSets sheet.
@@ -375,10 +390,6 @@ def generate_question(row, columns, question_translations):
     original_question_info = (row[TOOLTIP_COLUMN_NAME] if TOOLTIP_COLUMN_NAME in columns and
                             pd.notnull(row[TOOLTIP_COLUMN_NAME]) else None )
     question_info = manage_label(original_question_info)
-    question_info_translation = (
-        row[TRANSLATION_TOOLTIP_COLUMN].replace('"', '').replace("'", '').replace('\\', '/') if TRANSLATION_TOOLTIP_COLUMN in columns and
-                            pd.notnull(row[TRANSLATION_TOOLTIP_COLUMN]) else None
-                            )
 
     question_concept_id = (row['External ID'] if 'External ID' in columns and
                         pd.notnull(row['External ID']) else question_id)
@@ -439,7 +450,7 @@ def generate_question(row, columns, question_translations):
     if question_rendering_value == 'decimalnumber':
         question['disallowDecimals'] = False
 
-    question_translations[question_label] = question_label_translation
+    add_translation(question_translations, question_label, question_label_translation)
 
     question_validators = safe_json_loads(validation_format)
     if pd.notnull(question_validators):
@@ -450,7 +461,14 @@ def generate_question(row, columns, question_translations):
 
     if TOOLTIP_COLUMN_NAME in columns and pd.notnull(row[TOOLTIP_COLUMN_NAME]):
         question['questionInfo'] = question_info
-        question_translations[question_info] = question_info_translation
+        question_info_translation = (
+            row[TRANSLATION_TOOLTIP_COLUMN].replace('"', '').replace("'", '').replace('\\', '/') 
+                if (
+                    TRANSLATION_TOOLTIP_COLUMN in columns and
+                    pd.notnull(row[TRANSLATION_TOOLTIP_COLUMN])
+                ) else None
+        )
+        add_translation(question_translations, question_info, question_info_translation)
 
     if 'Calculation' in columns and pd.notnull(row['Calculation']):
         question['questionOptions']['calculate'] = {"calculateExpression": row['Calculation']}
