@@ -10,7 +10,7 @@ fn(state => {
   };
   
   // Extract environment name from the state or use a parameter
-  const environment = state.environment || 'lime-mosul-uat';
+  const environment = 'lime-mosul-uat';
   const environmentDisplay = environment.includes('-') ? 
     environment.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-') :
     environment.toUpperCase();
@@ -149,7 +149,4 @@ fn(state => {
       environments: state.environments
     };
   });
-});
-fn(state => {
-  delete state.references;
 });
