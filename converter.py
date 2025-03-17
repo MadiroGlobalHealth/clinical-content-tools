@@ -24,6 +24,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
 METADATA_FILE = os.getenv('METADATA_FILEPATH', './metadata_example.xlsx')
 TRANSLATION_SECTION_COLUMN = 'Translation - Section'
 TRANSLATION_QUESTION_COLUMN = 'Translation - Question'
+TRANSLATION_TOOLTIP_COLUMN = 'Translation - Tooltip'
 
 # Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
@@ -374,6 +375,10 @@ def generate_question(row, columns, question_translations):
     original_question_info = (row[TOOLTIP_COLUMN_NAME] if TOOLTIP_COLUMN_NAME in columns and
                             pd.notnull(row[TOOLTIP_COLUMN_NAME]) else None )
     question_info = manage_label(original_question_info)
+    question_info_translation = (
+        row[TRANSLATION_TOOLTIP_COLUMN].replace('"', '').replace("'", '').replace('\\', '/') if TRANSLATION_TOOLTIP_COLUMN in columns and
+                            pd.notnull(row[TRANSLATION_TOOLTIP_COLUMN]) else None
+                            )
 
     question_concept_id = (row['External ID'] if 'External ID' in columns and
                         pd.notnull(row['External ID']) else question_id)
@@ -445,6 +450,7 @@ def generate_question(row, columns, question_translations):
 
     if TOOLTIP_COLUMN_NAME in columns and pd.notnull(row[TOOLTIP_COLUMN_NAME]):
         question['questionInfo'] = question_info
+        question_translations[question_info] = question_info_translation
 
     if 'Calculation' in columns and pd.notnull(row['Calculation']):
         question['questionOptions']['calculate'] = {"calculateExpression": row['Calculation']}
