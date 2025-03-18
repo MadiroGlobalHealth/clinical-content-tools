@@ -25,6 +25,7 @@ METADATA_FILE = os.getenv('METADATA_FILEPATH', './metadata_example.xlsx')
 TRANSLATION_SECTION_COLUMN = 'Translation - Section'
 TRANSLATION_QUESTION_COLUMN = 'Translation - Question'
 TRANSLATION_TOOLTIP_COLUMN = 'Translation - Tooltip'
+TRANSLATION_ANSWER_COLUMN = 'Translation'
 
 # Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get('columns', {}).get('TOOLTIP_COLUMN_NAME')
@@ -480,18 +481,26 @@ def generate_question(row, columns, question_translations):
 
     if 'OptionSet name' in columns and pd.notnull(row['OptionSet name']):
         options = get_options(row['OptionSet name'])
-        question['questionOptions']['answers'] = [
-            {
+        question['questionOptions']['answers'] = []
+
+        for opt in options:
+            answer = {
                 "label": manage_label(opt['Answers']),
                 "concept": (manage_id(opt['Answers']) if opt['External ID'] == '#N/A' else
                     (opt['External ID'] if 'External ID' in columns and
                         pd.notnull(opt['External ID'])
                         else manage_id(opt['Answers'], id_type="answer",
                             question_id=question_id,
-                            all_questions_answers=ALL_QUESTIONS_ANSWERS))),
+                            all_questions_answers=ALL_QUESTIONS_ANSWERS)))
             }
-            for opt in options
-        ]
+            question['questionOptions']['answers'].append(answer)
+            # Manage Answer labels
+            answer_label = manage_label(opt['Answers'])
+            translated_answer_label = (row[TRANSLATION_ANSWER_COLUMN] if TRANSLATION_ANSWER_COLUMN in columns and
+                            pd.notnull(row[TRANSLATION_ANSWER_COLUMN]) else None )
+            add_translation(question_translations, answer_label, translated_answer_label)
+            
+
 
         ALL_QUESTIONS_ANSWERS.append({
             "question_id": question['id'],
