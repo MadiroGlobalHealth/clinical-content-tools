@@ -4,7 +4,7 @@ cursor('now', { key: 'lastSync' });
 fn(state => {
   state.siteName = 'GRP-GVA-LIME Project';
   state.sheets = ['OptionSets', 'identifiers', 'Places of living'];
-  state.folderPath = '/General/Phase II/Metadata/Shared/ready-for-test';
+  state.folderPath = '/General/Phase II/Iraq/Metadata';
   return state;
 });
 
@@ -87,7 +87,7 @@ get(`${$.workbookBase}/worksheets('omrs-form-metadata')/usedRange`).then(
           return obj;
         }, {})
       )
-      .filter(obj => Object.keys(obj).length > 0 && obj['Active']);
+      .filter(obj => Object.keys(obj).length > 0 && obj['Testing']);
 
     state.sheets.push(
       ...state.formMetadata.map(obj => obj['OMRS form sheet name'])
