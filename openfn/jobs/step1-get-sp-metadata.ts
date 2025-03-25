@@ -5,6 +5,7 @@ fn(state => {
   state.siteName = 'GRP-GVA-LIME Project';
   state.sheets = ['OptionSets', 'identifiers', 'Places of living'];
   state.folderPath = '/General/Phase II/Iraq/Metadata';
+  state.fileName = 'LIME EMR - Iraq Metadata - Release 1.xlsx';
   return state;
 });
 
@@ -23,44 +24,10 @@ getDrive({ id: $.siteId, owner: 'sites' });
 getFolder($.folderPath);
 
 fn(state => {
-  let targetFile;
-
-  // Filter for .xlsx files only
-  const xlsxFiles = state.data.value.filter(file =>
-    file.name.toLowerCase().endsWith('.xlsx')
-  );
-
-  if (xlsxFiles.length === 0) {
-    throw new Error('No Excel (.xlsx) files found in the specified folder.');
-  }
-
-  if (state.fileName) {
-    // If a specific fileName is provided, find that file among the xlsx files
-    targetFile = xlsxFiles.find(file => file.name === state.fileName);
-
-    if (!targetFile) {
-      console.log(
-        `Excel file "${state.fileName}" not found. Falling back to most recent Excel file.`
-      );
-    }
-  }
+  const targetFile = state.data.value.find(file => file.name === state.fileName);
 
   if (!targetFile) {
-    // If no fileName was provided or the specified file wasn't found,
-    // sort the xlsx files by the date extracted from the filename and get the most recent
-    const sortedFiles = xlsxFiles.sort((a, b) => {
-      const dateA = a.lastModifiedDateTime;
-      const dateB = b.lastModifiedDateTime;
-      if (dateA && dateB) {
-        return dateB - dateA; // Sort in descending order (most recent first)
-      }
-      return 0; // If dates can't be extracted, maintain original order
-    });
-    targetFile = sortedFiles[0];
-  }
-
-  if (!targetFile) {
-    throw new Error('No suitable Excel file found in the specified folder.');
+    throw new Error(`File "${state.fileName}" not found in the specified folder.`);
   }
 
   console.log('Target Excel file:', targetFile.name);
