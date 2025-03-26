@@ -27,6 +27,7 @@ TRANSLATION_SECTION_COLUMN = "Translation - Section"
 TRANSLATION_QUESTION_COLUMN = "Translation - Question"
 TRANSLATION_TOOLTIP_COLUMN = "Translation - Tooltip"
 TRANSLATION_ANSWER_COLUMN = "Translation"
+EN = "en"
 
 # Since tooltip name is different in metadata, extract it form Configuration
 TOOLTIP_COLUMN_NAME = config.get("columns", {}).get("TOOLTIP_COLUMN_NAME")
@@ -192,7 +193,13 @@ def manage_label(original_label):
     # Format the label
     # label = format_label(original_label)
 
-    return original_label
+    val = (
+        original_label.replace('"', "'").strip()
+        if type(original_label) == str
+        else original_label
+    )
+    return val
+    return original_label.strip() if type(original_label) == str else original_label
 
 
 # Manage IDs
@@ -488,9 +495,12 @@ def generate_question(row, columns, question_translations):
     # Add min/max values if rendering is numeric/number
     if question_rendering in ["numeric", "number"]:
         if "Lower limit" in columns and pd.notnull(row["Lower limit"]):
-            question_options["min"] = row["Lower limit"]
+            val = row["Lower limit"]
+            question_options["min"] = int(val) if type(val) == float else val
         if "Upper limit" in columns and pd.notnull(row["Upper limit"]):
-            question_options["max"] = row["Upper limit"]
+            val = row["Upper limit"]
+            question_options["max"] = int(val) if type(val) == float else val
+        question_options["step"] = 1
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
@@ -505,7 +515,7 @@ def generate_question(row, columns, question_translations):
 
     # If question_rendering_value == 'markdown' then append key 'value' with the value similar to the label and change the type key to 'markdown'
     if question_rendering_value == "markdown":
-        question["value"] = [f"## {question_label}"]
+        question["value"] = [question_label]
         question["type"] = "markdown"
         question["questionOptions"].pop("concept")
 
@@ -555,10 +565,14 @@ def generate_question(row, columns, question_translations):
     if "OptionSet name" in columns and pd.notnull(row["OptionSet name"]):
         options = get_options(row["OptionSet name"])
         question["questionOptions"]["answers"] = []
+        answers = []
 
         for opt in options:
+            answer_label = manage_label(opt["Answers"])
+            order = int(manage_label(opt["#"]))
             answer = {
                 "label": manage_label(opt["Answers"]),
+                "order": order,
                 "concept": (
                     manage_id(opt["Answers"])
                     if opt["External ID"] == "#N/A"
@@ -574,7 +588,7 @@ def generate_question(row, columns, question_translations):
                     )
                 ),
             }
-            question["questionOptions"]["answers"].append(answer)
+            answers.append(answer)
             # Manage Answer labels
             answer_label = manage_label(opt["Answers"])
             translated_answer_label = (
@@ -586,6 +600,10 @@ def generate_question(row, columns, question_translations):
             add_translation(
                 question_translations, answer_label, translated_answer_label
             )
+        question["questionOptions"]["answers"] = [
+            {"label": x["label"], "concept": x["concept"]}
+            for x in sorted(answers, key=lambda x: x["order"])
+        ]
 
         ALL_QUESTIONS_ANSWERS.append(
             {
@@ -700,6 +718,10 @@ def generate_form(sheet_name, form_translations):
     return form_data, concept_ids_set, count_total_questions, count_total_answers
 
 
+def keep_value_same_as_key(lang):
+    return lang in {EN}
+
+
 def generate_translation_file(form_name, language, translations_list):
     """
     Generate a translation file JSON.
@@ -715,7 +737,8 @@ def generate_translation_file(form_name, language, translations_list):
 
     # Reorganize keys in translations_list alphabetically
     ordered_translations_list = {
-        k: v for k, v in sorted(translations_list.items(), key=lambda item: item[0])
+        k: (v if not keep_value_same_as_key(language) else k)
+        for k, v in sorted(translations_list.items())
     }
 
     # Build the translation file JSON
@@ -748,9 +771,15 @@ for sheet in SHEETS:
     form, concept_ids, total_questions, total_answers = generate_form(
         sheet, translations_data
     )
-    translations = generate_translation_file(sheet, "ar", translations_data)
+    arabic_translations = generate_translation_file(sheet, "ar", translations_data)
+    english_translations = generate_translation_file(sheet, "en", translations_data)
     json_data = json.dumps(form, indent=2)
-    translations_json_data = json.dumps(translations, ensure_ascii=False, indent=2)
+    arabic_translations_json_data = json.dumps(
+        arabic_translations, ensure_ascii=False, indent=2
+    )
+    english_translations_json_data = json.dumps(
+        english_translations, ensure_ascii=False, indent=2
+    )
     try:
         json.loads(json_data)  # Validate JSON format
         form_name_output = sheet.replace(" ", "_")
@@ -759,7 +788,8 @@ for sheet in SHEETS:
         ) as f:
             f.write(json_data)
         print(f"Configuration file for form {sheet} generated successfully!")
-        json.loads(translations_json_data)  # Validate JSON format
+        json.loads(arabic_translations_json_data)  # Validate JSON format
+        json.loads(english_translations_json_data)  # Validate JSON format
         translation_file_name_output = sheet.replace(" ", "_")
         with open(
             os.path.join(
@@ -768,7 +798,15 @@ for sheet in SHEETS:
             "w",
             encoding="utf-8",
         ) as f:
-            f.write(translations_json_data)
+            f.write(arabic_translations_json_data)
+        with open(
+            os.path.join(
+                OUTPUT_DIR, f"{translation_file_name_output}_translations_en.json"
+            ),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            f.write(english_translations_json_data)
         print(f"Translation file for form {sheet} generated successfully!")
         print()
     except json.JSONDecodeError as e:
