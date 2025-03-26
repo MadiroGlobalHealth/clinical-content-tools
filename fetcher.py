@@ -1,17 +1,19 @@
 "Fetcher to get concepts from OpenConceptLab API and save them to a JSON file."
+
 from datetime import datetime
 import json
 import requests
 
 # Load the configuration settings from config.json
-with open('config.json', 'r', encoding='utf-8') as f:
+with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 # Extract the configuration settings
-FETCHER_BASE_URL = config.get('FETCHER_BASE_URL')
+FETCHER_BASE_URL = config.get("FETCHER_BASE_URL")
+
 
 def fetch_all_concepts(url, file_path):
-    " Fetch all concepts from the OpenConceptLab API and save them to a JSON file. "
+    "Fetch all concepts from the OpenConceptLab API and save them to a JSON file."
     total_concepts = 0
     page = 1
     is_first_page = True
@@ -25,7 +27,7 @@ def fetch_all_concepts(url, file_path):
             if not data:
                 break
 
-            with open(file_path, 'a', encoding='utf-8') as file:
+            with open(file_path, "a", encoding="utf-8") as file:
                 if is_first_page:
                     file.write("[\n")
                     is_first_page = False
@@ -46,11 +48,12 @@ def fetch_all_concepts(url, file_path):
             print(f"Failed to fetch data. Status code: {response.status_code}")
             break
 
-    with open(file_path, 'a', encoding='utf-8') as file:
+    with open(file_path, "a", encoding="utf-8") as file:
         file.write("\n]")
 
     print(f"Total concepts found: {total_concepts}")
     return total_concepts
+
 
 # URL of the API without the page parameter
 API_URL = f"{FETCHER_BASE_URL}/concepts/?q=&limit=0"
