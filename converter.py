@@ -194,7 +194,7 @@ def manage_label(original_label):
     # label = format_label(original_label)
 
     val = (
-        original_label.replace('"', "'").strip()
+        original_label.replace('"', "'").replace("’", "'").strip()
         if type(original_label) == str
         else original_label
     )
@@ -671,6 +671,8 @@ def generate_form(sheet_name, form_translations):
         page_df = df[df["Page"] == page]
 
         form_data["pages"].append({"label": f"{page}", "sections": []})
+        if page is not None:
+            form_translations[page] = page
 
         for section in page_df["Section"].unique():
             section_df = page_df[page_df["Section"] == section]
