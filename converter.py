@@ -500,7 +500,10 @@ def generate_question(row, columns, question_translations):
         if "Upper limit" in columns and pd.notnull(row["Upper limit"]):
             val = row["Upper limit"]
             question_options["max"] = int(val) if type(val) == float else val
-        question_options["step"] = 1
+        if question_rendering_value == "decimalnumber":
+            question_options["step"] = 0.01
+        else:
+            question_options["step"] = 1
 
     if should_render_workspace(question_rendering):
         workspace_button_label = get_workspace_button_label(question_rendering)
@@ -672,7 +675,7 @@ def generate_form(sheet_name, form_translations):
 
         form_data["pages"].append({"label": f"{page}", "sections": []})
         if page is not None:
-            form_translations[page] = page
+            form_translations[page] = None
 
         for section in page_df["Section"].unique():
             section_df = page_df[page_df["Section"] == section]
