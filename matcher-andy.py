@@ -1,4 +1,5 @@
 "OCL Concepts Matcher to find existing concepts in OCL based on provided Excel metadata"
+
 import json
 import math
 import time
@@ -12,27 +13,27 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Ignore potential warnings related to opening large Excel files
-openpyxl.reader.excel.warnings.simplefilter(action='ignore')
+openpyxl.reader.excel.warnings.simplefilter(action="ignore")
 
 # Load the configuration settings from config.json
-with open('config.json', 'r', encoding='utf-8') as f:
+with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 # Extract the configuration settings
 # Load the metadata spreadsheet
-METADATA_FILEPATH = os.getenv('METADATA_FILEPATH', './andytest.xlsx')
+METADATA_FILEPATH = os.getenv("METADATA_FILEPATH", "./andytest.xlsx")
 # Load the OCL Concepts spreadsheet
-OCL_URL = config.get('OCL_URL', 'https://app.openconceptlab.org/#')
+OCL_URL = config.get("OCL_URL", "https://app.openconceptlab.org/#")
 # Matching treshold for fuzzy matching
-FUZZY_THRESHOLD = config.get('FUZZY_THRESHOLD', 90)
+FUZZY_THRESHOLD = config.get("FUZZY_THRESHOLD", 90)
 # Output directory to save the generated form JSONs
-OUTPUT_DIR = config.get('OUTPUT_DIR', './generated_form_schemas')
+OUTPUT_DIR = config.get("OUTPUT_DIR", "./generated_form_schemas")
 # Get the list of sheets to process from the configuration settings
-SHEETS_TO_MATCH = os.getenv('SHEETS_TO_PREVIEW', 'F06-PHQ-9').split(',')
-SHEETS = SHEETS_TO_MATCH.append('OptionSets')
+SHEETS_TO_MATCH = os.getenv("SHEETS_TO_PREVIEW", "F06-PHQ-9").split(",")
+SHEETS = SHEETS_TO_MATCH.append("OptionSets")
 
 # Columns names from the metadata spreadsheet
-automatch_references = config.get('automatch_references', {})
+automatch_references = config.get("automatch_references", {})
 
 # Initialize counters
 # Counter for total concepts to match
@@ -46,6 +47,7 @@ unique_matches_per_row_all_sheets = {}
 
 # Start the timer to calculate the time taken to run the code
 start_time = time.time()
+
 
 # Find the best matches for each primary and secondary label in the metadata spreadsheet
 def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit=5):
@@ -65,28 +67,31 @@ def find_best_matches(primary, secondary, data, threshold=FUZZY_THRESHOLD, limit
     query = f"{primary} {secondary}"
 
     # Extract display_names from data for comparison
-    display_names = [item['display_name'] for item in data]
+    display_names = [item["display_name"] for item in data]
 
     # Use rapidfuzz's process.extract to find the best matches with threshold
     matches = process.extract(
         query, display_names, scorer=fuzz.WRatio, score_cutoff=threshold, limit=limit
-        )
+    )
 
     # Map the matches back to their corresponding IDs and definitions
     for _, score, match_index in matches:
         if score >= FUZZY_THRESHOLD:
-            results.append((
-                data[match_index]['id'],
-                data[match_index]['external_id'],
-                data[match_index]['display_name'],
-                data[match_index]['description'],
-                data[match_index]['datatype'],
-                data[match_index]['concept_class'],
-                data[match_index]['url'],
-                score
-                ))
+            results.append(
+                (
+                    data[match_index]["id"],
+                    data[match_index]["external_id"],
+                    data[match_index]["display_name"],
+                    data[match_index]["description"],
+                    data[match_index]["datatype"],
+                    data[match_index]["concept_class"],
+                    data[match_index]["url"],
+                    score,
+                )
+            )
     # Return the list of results
     return results
+
 
 # Open the metadata Excel file and find the column indices for the required columns
 def find_column_index(worksheet, column_name):
@@ -100,10 +105,13 @@ def find_column_index(worksheet, column_name):
     Returns:
     int: The index of the specified column name in the second row.
     """
-    for idx, cell in enumerate(worksheet[2], 1):  # assuming the second row contains headers
+    for idx, cell in enumerate(
+        worksheet[2], 1
+    ):  # assuming the second row contains headers
         if cell.value == column_name:
             return idx
     return -1  # Return -1 if the column name is not found
+
 
 # Iterate through the sheets in df that are in the sheets list with headers on row 2
 for sheet_name in SHEETS:
@@ -114,44 +122,48 @@ for sheet_name in SHEETS:
     # Iterate through each OCL source and look for suggestions for the primary and secondary lookups
     for source_name, source_config in automatch_references.items():
         print(f"Looking for suggestions in {source_name} source...")
-        SOURCE_FILEPATH = source_config['source_filepath']
+        SOURCE_FILEPATH = source_config["source_filepath"]
 
-        with open(SOURCE_FILEPATH, 'r', encoding='UTF-8') as f:
+        with open(SOURCE_FILEPATH, "r", encoding="UTF-8") as f:
             json_data = json.load(f)
             # Extract only the ID, display names, external IDs, datatype,
             # concept_class, and extras > definitions from the JSON data
             source_data = []
             for item in json_data:
-                concept_id = item.get('id', '')
-                external_id = item.get('external_id')
-                display_name = item.get('display_name', '')
+                concept_id = item.get("id", "")
+                external_id = item.get("external_id")
+                display_name = item.get("display_name", "")
                 definition = (
-                    item.get('extras', {}).get('definition', '')
-                    if item.get('extras', {}) else ''
+                    item.get("extras", {}).get("definition", "")
+                    if item.get("extras", {})
+                    else ""
                 )
                 description = (
-                    item.get('descriptions', [])[0].get('description', '')
-                    if item.get('descriptions', []) else definition
+                    item.get("descriptions", [])[0].get("description", "")
+                    if item.get("descriptions", [])
+                    else definition
                 )
-                datatype = item.get('datatype')
-                concept_class = item.get('concept_class')
-                concept_url = item.get('URL')
+                datatype = item.get("datatype")
+                concept_class = item.get("concept_class")
+                concept_url = item.get("URL")
 
                 # If no description is found, use the definition as the description
-                if description == '':
+                if description == "":
                     description = definition
 
                 # Add the concept details to the source_data list
-                source_data.append({
-                    'id': concept_id,
-                    'display_name': display_name,
-                    'definition': definition,
-                    'description': description,
-                    'datatype': datatype,
-                    'concept_class': concept_class,
-                    'external_id': external_id,
-                    'url': concept_url
-                })
+                source_data.append(
+                    {
+                        "id": concept_id,
+                        "display_name": display_name,
+                        "definition": definition,
+                        "description": description,
+                        "datatype": datatype,
+                        "concept_class": concept_class,
+                        "external_id": external_id,
+                        "url": concept_url,
+                    }
+                )
 
         # Load the Excel file, considering the header on row 2
         df = pd.read_excel(METADATA_FILEPATH, sheet_name=sheet_name, header=1)
@@ -162,18 +174,24 @@ for sheet_name in SHEETS:
 
         # Using Excel Writer, append or update the details in the original existing
         # Excel sheet and cells in the specified columns depending on the source name
-        with pd.ExcelWriter(METADATA_FILEPATH, engine='openpyxl', mode='a') as writer:
+        with pd.ExcelWriter(METADATA_FILEPATH, engine="openpyxl", mode="a") as writer:
             workbook = writer.book
             ws = workbook[sheet_name]
 
             # Get the column indices for the suggestion,
             # external ID, description, datatype, concept class, and extras
-            suggestion_column = find_column_index(ws, source_config['suggestion_column'])
-            external_id_column = find_column_index(ws, source_config['external_id_column'])
-            description_column = find_column_index(ws, source_config['description_column'])
-            datatype_column = find_column_index(ws, source_config['datatype_column'])
-            dataclass_column = find_column_index(ws, source_config['dataclass_column'])
-            score_column = find_column_index(ws, source_config['score_column'])
+            suggestion_column = find_column_index(
+                ws, source_config["suggestion_column"]
+            )
+            external_id_column = find_column_index(
+                ws, source_config["external_id_column"]
+            )
+            description_column = find_column_index(
+                ws, source_config["description_column"]
+            )
+            datatype_column = find_column_index(ws, source_config["datatype_column"])
+            dataclass_column = find_column_index(ws, source_config["dataclass_column"])
+            score_column = find_column_index(ws, source_config["score_column"])
 
             # Initialize a dictionary to store unique matches per row for the current sheet
             unique_matches_per_row = {}
@@ -182,8 +200,8 @@ for sheet_name in SHEETS:
             # the primary and secondary labels to match
             for index, row in df.iterrows():
 
-                primary_lookup = row.get('Label if different') or None
-                secondary_lookup = row.get('Question') or row.get('Answers') or None
+                primary_lookup = row.get("Label if different") or None
+                secondary_lookup = row.get("Question") or row.get("Answers") or None
 
                 # Stringify and Lowercase primary and secondary
                 primary_lookup = str(primary_lookup).lower()
@@ -191,7 +209,9 @@ for sheet_name in SHEETS:
 
                 # Get suggestions from each OCL source using closest match
                 # with RapidFuzz using the primary lookup and secondary lookup
-                best_matches = find_best_matches(primary_lookup, secondary_lookup, source_data)
+                best_matches = find_best_matches(
+                    primary_lookup, secondary_lookup, source_data
+                )
                 # If at least one match is found, increment the MATCHES_FOUND counter by 1
                 if len(best_matches) > 0:
                     # If matches were found, add the unique row identifier to the dictionary
@@ -209,23 +229,20 @@ for sheet_name in SHEETS:
                     else:
                         matches_per_source[source_name] = 1
 
-
                 # Add the suggestions to the Excel sheet
                 for m in best_matches:
                     # Write the suggestion details to the Excel sheet
                     # Add URL concatenated with OCL_URL in Excel cell using =HYPERLINK() formula
-                    ws.cell(row=index+3, column=suggestion_column).value = (
-                        f"=HYPERLINK(\"{OCL_URL}{m[6]}\", \"{m[2]}\")"
+                    ws.cell(row=index + 3, column=suggestion_column).value = (
+                        f'=HYPERLINK("{OCL_URL}{m[6]}", "{m[2]}")'
                     )
-                    ws.cell(row=index+3, column=external_id_column).value = m[1]
-                    ws.cell(row=index+3, column=description_column).value = m[3]
-                    ws.cell(row=index+3, column=datatype_column).value = m[4]
-                    ws.cell(row=index+3, column=dataclass_column).value = m[5]
-                    ws.cell(row=index+3, column=score_column).value = math.ceil(m[7])
+                    ws.cell(row=index + 3, column=external_id_column).value = m[1]
+                    ws.cell(row=index + 3, column=description_column).value = m[3]
+                    ws.cell(row=index + 3, column=datatype_column).value = m[4]
+                    ws.cell(row=index + 3, column=dataclass_column).value = m[5]
+                    ws.cell(row=index + 3, column=score_column).value = math.ceil(m[7])
 
-                    print(
-                        f"Added suggestion: {m[2]} - {m[1]} with score of {m[7]}"
-                    )
+                    print(f"Added suggestion: {m[2]} - {m[1]} with score of {m[7]}")
 
             # Close the Excel file writer
             workbook.save(METADATA_FILEPATH)
