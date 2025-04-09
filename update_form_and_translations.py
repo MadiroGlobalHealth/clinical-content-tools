@@ -8,23 +8,21 @@ import json
 
 load_dotenv(find_dotenv())
 
-PATH_TO_LIME_EMR = "PATH_TO_LIME_EMR"
 SHEETS_TO_PREVIEW = "SHEETS_TO_PREVIEW"
-FORM_PATH = "sites/mosul/configs/openmrs/initializer_config/ampathforms/"
-FORM_TRANSLATION_PATH = (
-    "sites/mosul/configs/openmrs/initializer_config/ampathformstranslations/"
-)
+PATH_TO_FORM_FILES = "PATH_TO_FORM_FILES"
+PATH_TO_TRANSLATION_FILES = "PATH_TO_TRANSLATION_FILES"
 GENERATED_FORM_PATH = "generated_form_schemas/"
 CURRENT_DIRECTORY = os.getcwd()
 
-lime_emr_repo_link = None
+path_to_form_files = None
+path_to_form_translation_files = None
 
 
 def get_form_translations_file_name(form_name, lang):
     return f"{form_name}_translations_{lang}.json"
 
 
-class LIME_EMR_Form:
+class DISTRO_FORM:
 
     def __init__(self, form_name):
         self.form_name = form_name
@@ -35,12 +33,11 @@ class LIME_EMR_Form:
         return get_form_translations_file_name(self.form_name, lang)
 
     def _get_form_path(self):
-        return os.path.join(lime_emr_repo_link, FORM_PATH, f"{self.form_name}.json")
+        return os.path.join(path_to_form_files, f"{self.form_name}.json")
 
     def _get_form_translations_path(self, lang):
         return os.path.join(
-            lime_emr_repo_link,
-            FORM_TRANSLATION_PATH,
+            path_to_form_translation_files,
             self.get_translation_file_name(lang),
         )
 
@@ -151,24 +148,26 @@ class Generated_Form:
 
 
 if __name__ == "__main__":
-    lime_emr_repo_link = os.getenv(PATH_TO_LIME_EMR)
-    if not lime_emr_repo_link:
-        print("Environment variable 'PATH_TO_LIME_EMR' not set.")
+    path_to_form_files = os.getenv(PATH_TO_FORM_FILES)
+    path_to_form_translation_files = os.getenv(PATH_TO_TRANSLATION_FILES)
+    if not path_to_form_files:
+        print("Environment variable 'PATH_TO_FORM_FILES' not set.")
+    elif not path_to_form_translation_files:
+        print("Environment variable 'PATH_TO_FORM_FILES' not set.")
     else:
-
         all_forms = os.getenv(SHEETS_TO_PREVIEW).split(",")
 
         for name in all_forms:
             form_name = f"{name.replace(" ", "_")}"
-            lime_emr_form = LIME_EMR_Form(form_name)
+            distro_form = DISTRO_FORM(form_name)
 
             generated_form = Generated_Form(form_name)
 
             generated_form_content = generated_form.get_form_content()
-            lime_emr_form.update_form(generated_form_content)
+            distro_form.update_form(generated_form_content)
 
             for lang in ["ar", "en"]:
                 generated_text_translations = generated_form.get_text_translations(lang)
-                lime_emr_form.update_translations(generated_text_translations, lang)
+                distro_form.update_translations(generated_text_translations, lang)
 
             print("Translations updated for form: ", name)

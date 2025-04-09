@@ -5,6 +5,7 @@
 This repository aims to provide a set of scripts and utilities to (hopefully) facilitate the management of clinical content using [OpenConceptLab (OCL)](https://openconceptlab.org/) and [OpenMRS 3 Forms](https://o3-docs.openmrs.org/docs/forms-in-o3/build-forms-with-o3-form-builder.en-US). The tools are designed to automate repetitive tasks across various implementers, facilities, and forms.
 
 The vision behind this set of tools is to evolve into a user-friendly and **flexible toolkit** covering critical and often cumbersome stages of Health Metadata Management. Here is an **overview and progress** made on each stage:
+
 ```mermaid
 %%{
   init: {
@@ -24,29 +25,29 @@ flowchart LR
          <div style='font-size:22px;'><b>🏗️<br><br>Paper-To-Form Converter</b></div>
          <div><br>1st tests made, prompting refined</div>
          <div>Target release: June 2025</div>
-         </div>"] --> 
+         </div>"] -->
     B["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
          <div style='font-size:22px;'><b>🏗️<br><br>Concept standardization and mapping</b></div>
          <div><br>OCL Mapper v2 in progress</div>
          <div>Target release: June 2025</div>
          </div>"]
-    B --> 
+    B -->
     C["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
          <div style='font-size:22px;'><b>🗓️<br><br>Content creation assistant for OCL</b></div>
          <div><br>Planned</div>
          </div>"]
-    C --> 
+    C -->
     D["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
          <div style='font-size:22px;'><b>🏗️<br><br>Metadata validation assistant</b></div>
          <div><br>Initial tool being prepared</div>
          </div>"]
-    D --> 
+    D -->
     E["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
          <div style='font-size:22px;'><b>🚀<br><br>Metadata to OpenMRS 3 form generation</b></div>
          <div><br>Used with MSF forms</div>
          <div>Automation coverage: 80%</div>
          </div>"]
-    E --> 
+    E -->
     F["<div style='width:250px; height:250px; display:flex; flex-direction:column; justify-content:center; text-align:center;'>
          <div style='font-size:22px;'><b>🏗️<br><br>Metadata to e2e test cases automation</b></div>
          <div><br>1st tests made, prompting refined</div>
@@ -55,7 +56,8 @@ flowchart LR
 
 ```
 
-### Below if an introduction video about the standardization and mapping tooling - Though deprecated and now replaced by OCL Mapper.  
+### Below if an introduction video about the standardization and mapping tooling - Though deprecated and now replaced by OCL Mapper.
+
 [Here is an explanation/demo video](https://www.youtube.com/watch?v=s9S4FaZib1U)
 
 <a href="https://www.loom.com/share/d2d049a21a7347d6a9af951e2e5c0ba9?sid=5bcbc54f-e0e3-4ad7-a039-8ced49af9813" target="_blank">
@@ -63,12 +65,15 @@ flowchart LR
 </a>
 
 ## Python scripts
+
 1. **OCL concept automatching**: `matcher.py` automates the process of matching OCL concepts.
 2. **XLSX to O3 form schema conversion**: `converter.py` converts XLSX files to O3 (OpenMRS 3) form JSON schemas.
 
 ## Tooling scripts
+
 3. **OCL Source fetcher**: `fetcher.py` download a local snapshot of an OCL source for the automatch.
 4. **Source Filter**: `filter.py` creates a filtered version of the source snapshot to improve performance.
+5. **Updating the form and translations in your EMR repo**: `update_form_and_translations.py` takes the newly generated form and translation files and updates them in your repo almost instantly.
 
 ## Requirements
 
@@ -102,6 +107,7 @@ Create a `.env` file from the provided `.env.example` file and update in the req
 ```bash
 cp .env.example .env
 ```
+
 This file contains the common configuration variables. You can modify the values as needed.
 
 ### Common configuration file
@@ -123,6 +129,7 @@ To use the `matcher.py` script, you need to provide two input files:
 2. JSON files containing the reference data for matching. Examples provided in `ocl_source_snapshots`: `MSF_Source_Filtered_20240712_163433.json` for MSF Source and `CIEL_Source_Filtered_20240708_153712.json` for CIEL Source
 
 You can configure the destination columns where to write the suggested matches, for each OCL source provided:
+
 - `source_filepath`: The file path of the JSON file containing the concepts from the OCL source.
 - `suggestion_column`: The name of the column in the metadata Excel file that contains the suggestions for matching concepts.
 - `external_id_column`: The name of the column in the metadata Excel file that contains the external IDs of the concepts.
@@ -148,8 +155,36 @@ To run the script, use the following command:
 ```bash
 python converter.py
 ```
+
 The script will then generate OpenMRS 3 form configurations and translation files from the data in the Excel file, and store them in the folder `generated_form_schemas`. Then you can copy-paste them directly into OpenMRS Initializer folder or Form Builder UI.
 
+### Usage and configuration for `update_form_and_translations.py`
+
+This script is designed to be executed after `converter.py`. It updates the form and translation files in the distribution repository (`distro`) using the newly generated files from the `generated_form_schemas/` folder. The script relies on properties defined in the `.env` file to locate the distro repository and its relevant directories.
+
+You can configure the following properties in the `.env` file:
+
+- `PATH_TO_FORM_FILES`: The absolute path to the `ampathforms/` folder where the form JSON files are stored. Use the `pwd` command in your `ampathforms/` directory to get the exact path.
+- `PATH_TO_TRANSLATION_FILES`: The absolute path to the `ampathformtranslation/` folder where the translation files are stored. Use the `pwd` command in your `ampathformtranslations/` directory to get the exact path.
+
+> **Note:** The form and translation files must already exist in the distro repository. If they do not, you can manually copy the generated files into the appropriate directories. This script is intended to **update** existing files, minimizing manual copy-paste operations for developers or users.
+
+To execute the script, use the following command:
+
+```bash
+python update_form_and_translations.py
+```
+
+You can chain the execution of `converter.py` and `update_form_and_translations.py` as follows:
+
+```bash
+python converter.py && python update_form_and_translations.py
+```
+
+This will:
+
+1. Generate the form and translation files using `converter.py`.
+2. Update the `pages` property in the form JSON files and the `translations` in the respective translation files within your distro repository.
 
 ## Contributing
 
