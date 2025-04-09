@@ -160,7 +160,7 @@ The script will then generate OpenMRS 3 form configurations and translation file
 
 ### Usage and configuration for `update_form_and_translations.py`
 
-This script is designed to be executed after `converter.py`. It updates the form and translation files in the distribution repository (`distro`) using the newly generated files from the `generated_form_schemas/` folder. The script relies on properties defined in the `.env` file to locate the distro repository and its relevant directories.
+This script is designed to be executed after `converter.py`. It updates the form and translation files in the `distro` repo using the newly generated files from the `generated_form_schemas/` folder. The script relies on properties defined in the `.env` file to locate the distro repository and its relevant directories.
 
 You can configure the following properties in the `.env` file:
 
