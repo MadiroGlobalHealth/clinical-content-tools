@@ -199,7 +199,6 @@ def manage_label(original_label):
         else original_label
     )
     return val
-    return original_label.strip() if type(original_label) == str else original_label
 
 
 # Manage IDs
