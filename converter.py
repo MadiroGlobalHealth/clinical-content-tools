@@ -12,7 +12,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 # Load the environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 # Ignore potential warnings related to opening large Excel files
 openpyxl.reader.excel.warnings.simplefilter(action="ignore")
@@ -661,10 +661,10 @@ def generate_question(row, columns, question_translations):
 
         for opt in options:
             answer_label = manage_label(opt["Answers"])
-            order = int(manage_label(opt["#"]))
+            order = int(manage_label(opt["#"])) if opt["#"] is not None else None
             answer = {
                 "label": manage_label(opt["Answers"]),
-                "order": order,
+                "order": order if order is not None else 0,
                 "concept": (
                     manage_id(opt["Answers"])
                     if opt["External ID"] == "#N/A"
@@ -831,8 +831,8 @@ def generate_translation_file(form_name, language, translations_list):
 
     # Reorganize keys in translations_list alphabetically
     ordered_translations_list = {
-        k: (v if not keep_value_same_as_key(language) else k)
-        for k, v in sorted(translations_list.items())
+        str(k): (v if not keep_value_same_as_key(language) else str(k))
+        for k, v in sorted(translations_list.items(), key=lambda item: str(item[0]))
     }
 
     # Build the translation file JSON
