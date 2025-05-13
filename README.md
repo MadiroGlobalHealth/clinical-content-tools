@@ -186,6 +186,69 @@ This will:
 1. Generate the form and translation files using `converter.py`.
 2. Update the `pages` property in the form JSON files and the `translations` in the respective translation files within your distro repository.
 
+#### Calculation Features
+
+The form generator supports two main types of calculations that can be configured in the Excel metadata file:
+
+1. **Previous Observation Values**: Fetch the most recent observation value for a concept from previous encounters
+2. **Cross-References**: Reference values from other questions within the same form
+
+##### Fetching Previous Values
+
+To fetch a value from previous encounters, add `previous` or `latest` in the Calculation column:
+
+```
+Question         | External ID            | Datatype | Calculation
+-----------------|------------------------|----------|------------
+Last PHQ-9 score | depressionSeverityScale| coded    | previous
+```
+
+This will generate a calculation that fetches the most recent value:
+
+```json
+{
+  "calculateExpression": "api.getLatestObs(patient.id, 'depressionSeverityScale').then(obs => obs?.valueCodableConcept?.code)",
+  "readonly": true
+}
+```
+
+##### Cross-Referencing Questions
+
+To reference another question's value within the same form, use `ref:` prefix followed by the question ID:
+
+```
+Question        | External ID    | Datatype  | Calculation
+----------------|----------------|-----------|-------------
+MHOS score      | mhos_score     | numeric   |
+Last MHOS score | last_mhos_score| numeric   | ref:mhosScore
+```
+
+This will generate:
+
+```json
+{
+  "calculateExpression": "api.getLatestObs(patient.id, 'mhosScore').then(obs => obs?.valueQuantity?.value)",
+  "readonly": true
+}
+```
+
+##### Important Notes:
+
+1. **Value Accessors**: The script automatically selects the correct value accessor based on datatype:
+
+   - `numeric`: `valueQuantity?.value`
+   - `coded`: `valueCodableConcept?.code`
+   - `text`: `valueString`
+
+2. **Required Fields**:
+
+   - For previous values: External ID must be filled
+   - For cross-references: Referenced question ID must exist in the form
+   - Datatype must be correctly specified
+
+3. **Readonly Behavior**: All calculated fields are set as readonly by default
+
+
 ## Contributing
 
 Contributions to the Clinical Content Management Tools project are welcome! If you have any suggestions, improvements, or bug fixes, please feel free to open an issue or submit a pull request.

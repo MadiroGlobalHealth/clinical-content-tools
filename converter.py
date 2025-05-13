@@ -406,6 +406,95 @@ def add_translation(translations, label, translated_string):
             return
     translations[label] = translated_string
 
+def build_api_calculation(concept_id, datatype='', readonly=True):
+    """
+    Builds an API-based calculation expression based on the datatype.
+
+    Args:
+        concept_id (str): The concept ID to fetch
+        datatype (str): The datatype of the observation ('text', 'numeric', 'coded', etc.)
+        readonly (bool): Whether the field should be readonly
+
+    Returns:
+        dict: A calculation object
+    """
+    if datatype.lower() == 'numeric':
+        value_accessor = "valueQuantity?.value"
+    elif datatype.lower() == 'coded':
+        value_accessor = "valueCodableConcept?.code"
+    else:  # default to text
+        value_accessor = "valueString"
+
+    calculate_expression = f"api.getLatestObs(patient.id, '{concept_id}').then(obs => obs?.{value_accessor})"
+
+    return {
+        "calculateExpression": calculate_expression,
+        "readonly": readonly
+    }
+
+def build_reference_calculation(referenced_question_id, datatype=''):
+    """
+    Builds a calculation expression that references another question's value
+    in the same form using the API format.
+
+    Args:
+        referenced_question_id (str): The ID of the question of whose value we want to reference
+        datatype (str): The datatype of the observation ('text', 'numeric', 'coded', etc.)
+
+    Returns:
+        dict: A calculation object
+    """
+    # Determine the value accessor based on datatype
+    if datatype.lower() == 'numeric':
+        value_accessor = "valueQuantity?.value"
+    elif datatype.lower() == 'coded':
+        value_accessor = "valueCodableConcept?.code"
+    else:  # default to text
+        value_accessor = "valueString"
+
+    return {
+        "calculateExpression": f"api.getLatestObs(patient.id, '{referenced_question_id}').then(obs => obs?.{value_accessor})",
+        "readonly": True
+    }
+
+def process_calculation(calculation, datatype='', concept_id=None):
+    """
+    Process the calculation field and return appropriate calculation object.
+
+    Args:
+        calculation: The calculation value from the Excel sheet
+        datatype: The datatype of the field
+        concept_id: The concept ID for the question
+
+    Returns:
+        dict: A calculation object
+    """
+    try:
+        # Check if it's a special keyword
+        if isinstance(calculation, str):
+            calc_lower = calculation.lower()
+            if calc_lower in ['previous', 'latest']:
+                # Get previous value of this concept
+                if concept_id:
+                    return build_api_calculation(concept_id, datatype)
+                return None
+            elif calc_lower.startswith('ref:'):
+                # Reference another question's value
+                referenced_id = calculation[4:].strip()  # Remove 'ref:' prefix
+                return build_reference_calculation(referenced_id, datatype)
+
+        # Try parsing as JSON
+        calc_json = json.loads(calculation)
+        if isinstance(calc_json, dict):
+            if 'calculateExpression' in calc_json:
+                return calc_json
+            else:
+                return {"calculateExpression": json.dumps(calc_json)}
+        else:
+            return {"calculateExpression": calculation}
+
+    except (json.JSONDecodeError, AttributeError):
+        return {"calculateExpression": calculation}
 
 def generate_question(row, columns, question_translations):
     """
@@ -552,10 +641,11 @@ def generate_question(row, columns, question_translations):
         )
         add_translation(question_translations, question_info, question_info_translation)
 
-    if "Calculation" in columns and pd.notnull(row["Calculation"]):
-        question["questionOptions"]["calculate"] = {
-            "calculateExpression": row["Calculation"]
-        }
+    if 'Calculation' in columns and pd.notnull(row['Calculation']):
+        calculation = row['Calculation']
+        calculated_result = process_calculation(calculation, question_datatype, question_concept_id)
+        if calculated_result:
+            question_options['calculate'] = calculated_result
 
     if "Skip logic" in columns and pd.notnull(row["Skip logic"]):
         question["hide"] = {
