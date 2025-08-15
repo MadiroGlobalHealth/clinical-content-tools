@@ -406,7 +406,8 @@ def add_translation(translations, label, translated_string):
             return
     translations[label] = translated_string
 
-def build_api_calculation(concept_id, datatype='', readonly=True):
+
+def build_api_calculation(concept_id, datatype="", readonly=True):
     """
     Builds an API-based calculation expression based on the datatype.
 
@@ -418,21 +419,19 @@ def build_api_calculation(concept_id, datatype='', readonly=True):
     Returns:
         dict: A calculation object
     """
-    if datatype.lower() == 'numeric':
+    if datatype.lower() == "numeric":
         value_accessor = "valueQuantity?.value"
-    elif datatype.lower() == 'coded':
+    elif datatype.lower() == "coded":
         value_accessor = "valueCodableConcept?.code"
     else:  # default to text
         value_accessor = "valueString"
 
     calculate_expression = f"api.getLatestObs(patient.id, '{concept_id}').then(obs => obs?.{value_accessor})"
 
-    return {
-        "calculateExpression": calculate_expression,
-        "readonly": readonly
-    }
+    return {"calculateExpression": calculate_expression, "readonly": readonly}
 
-def build_reference_calculation(referenced_question_id, datatype=''):
+
+def build_reference_calculation(referenced_question_id, datatype=""):
     """
     Builds a calculation expression that references another question's value
     in the same form using the API format.
@@ -445,19 +444,20 @@ def build_reference_calculation(referenced_question_id, datatype=''):
         dict: A calculation object
     """
     # Determine the value accessor based on datatype
-    if datatype.lower() == 'numeric':
+    if datatype.lower() == "numeric":
         value_accessor = "valueQuantity?.value"
-    elif datatype.lower() == 'coded':
+    elif datatype.lower() == "coded":
         value_accessor = "valueCodableConcept?.code"
     else:  # default to text
         value_accessor = "valueString"
 
     return {
         "calculateExpression": f"api.getLatestObs(patient.id, '{referenced_question_id}').then(obs => obs?.{value_accessor})",
-        "readonly": True
+        "readonly": True,
     }
 
-def process_calculation(calculation, datatype='', concept_id=None):
+
+def process_calculation(calculation, datatype="", concept_id=None):
     """
     Process the calculation field and return appropriate calculation object.
 
@@ -473,12 +473,12 @@ def process_calculation(calculation, datatype='', concept_id=None):
         # Check if it's a special keyword
         if isinstance(calculation, str):
             calc_lower = calculation.lower()
-            if calc_lower in ['previous', 'latest']:
+            if calc_lower in ["previous", "latest"]:
                 # Get previous value of this concept
                 if concept_id:
                     return build_api_calculation(concept_id, datatype)
                 return None
-            elif calc_lower.startswith('ref:'):
+            elif calc_lower.startswith("ref:"):
                 # Reference another question's value
                 referenced_id = calculation[4:].strip()  # Remove 'ref:' prefix
                 return build_reference_calculation(referenced_id, datatype)
@@ -486,7 +486,7 @@ def process_calculation(calculation, datatype='', concept_id=None):
         # Try parsing as JSON
         calc_json = json.loads(calculation)
         if isinstance(calc_json, dict):
-            if 'calculateExpression' in calc_json:
+            if "calculateExpression" in calc_json:
                 return calc_json
             else:
                 return {"calculateExpression": json.dumps(calc_json)}
@@ -495,6 +495,7 @@ def process_calculation(calculation, datatype='', concept_id=None):
 
     except (json.JSONDecodeError, AttributeError):
         return {"calculateExpression": calculation}
+
 
 def generate_question(row, columns, question_translations):
     """
@@ -580,6 +581,8 @@ def generate_question(row, columns, question_translations):
 
     question_options = {"rendering": question_rendering, "concept": question_concept_id}
 
+    all_concept_ids.append(question_concept_id)
+
     # Add min/max values if rendering is numeric/number
     if question_rendering in ["numeric", "number"]:
         if "Lower limit" in columns and pd.notnull(row["Lower limit"]):
@@ -618,6 +621,13 @@ def generate_question(row, columns, question_translations):
         question["disallowDecimals"] = False
 
     add_translation(question_translations, question_label, question_label_translation)
+    if (
+        "buttonLabel" in question["questionOptions"]
+        and question["questionOptions"]["buttonLabel"] is not None
+    ):
+        add_translation(
+            question_translations, question["questionOptions"]["buttonLabel"], None
+        )
 
     question_validators = safe_json_loads(validation_format)
     if pd.notnull(question_validators):
@@ -641,11 +651,13 @@ def generate_question(row, columns, question_translations):
         )
         add_translation(question_translations, question_info, question_info_translation)
 
-    if 'Calculation' in columns and pd.notnull(row['Calculation']):
-        calculation = row['Calculation']
-        calculated_result = process_calculation(calculation, question_datatype, question_concept_id)
+    if "Calculation" in columns and pd.notnull(row["Calculation"]):
+        calculation = row["Calculation"]
+        calculated_result = process_calculation(
+            calculation, question_datatype, question_concept_id
+        )
         if calculated_result:
-            question_options['calculate'] = calculated_result
+            question_options["calculate"] = calculated_result
 
     if "Skip logic" in columns and pd.notnull(row["Skip logic"]):
         question["hide"] = {
@@ -661,7 +673,9 @@ def generate_question(row, columns, question_translations):
 
         for opt in options:
             answer_label = manage_label(opt["Answers"])
-            order = int(manage_label(opt["#"])) if opt["#"] is not None else None
+            order = (
+                int(manage_label(opt["Order"])) if opt["Order"] is not None else None
+            )
             answer = {
                 "label": manage_label(opt["Answers"]),
                 "order": order if order is not None else 0,
@@ -680,6 +694,7 @@ def generate_question(row, columns, question_translations):
                     )
                 ),
             }
+            all_concept_ids.append(answer["concept"])
             answers.append(answer)
             # Manage Answer labels
             answer_label = manage_label(opt["Answers"])
@@ -852,7 +867,8 @@ OUTPUT_DIR = "./generated_form_schemas"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Load the data
-all_concept_ids = set()
+concepts = {}
+all_concept_ids = []
 all_forms = []
 TOTAL_QUESTIONS = 0
 TOTAL_ANSWERS = 0
@@ -861,6 +877,7 @@ TOTAL_ANSWERS = 0
 start_time = time.time()
 
 for sheet in SHEETS:
+    all_concept_ids.clear()
     translations_data = {}
     form, concept_ids, total_questions, total_answers = generate_form(
         sheet, translations_data
@@ -908,10 +925,13 @@ for sheet in SHEETS:
         print(
             f"JSON format error in translations form generated from sheet {sheet}: {e}"
         )
-    all_concept_ids.update(concept_ids)
+    print("all_concept_ids", len(all_concept_ids))
+    concepts[sheet] = all_concept_ids
     all_forms.append(form)
     TOTAL_QUESTIONS += total_questions
     TOTAL_ANSWERS += total_answers
+
+json.dump(concepts, open("concepts.json", "w"), indent=2)
 
 # Count the number of forms generated
 FORMS_GENERATED = len(SHEETS)
